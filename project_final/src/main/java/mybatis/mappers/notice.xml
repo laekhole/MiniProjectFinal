@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+      PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.notice">
+
+
+<!-- 	1. 공지사항 목록 -->
+	<select id="getNoticeList" resultType="NoticeDTO">
+		select 
+			noticeid
+			, title
+			, writer_uid
+			, reg_date
+			, view_count 
+		from notice 
+		order by noticeid desc
+	</select>
+	
+ 
+	<!-- 2. 공지사항 상세 -->
+	<select id="getNotice" resultType="NoticeDTO" >
+		select *
+		from notice 
+		where noticeid = #{noticeid}
+	</select>
+
+	 
+
+ 		 
+	<!-- 3. 공지사항 글쓰기	 -->
+	<insert id="insertNotice" >
+		<selectKey keyProperty="noticeid" resultType="int"  order="BEFORE">
+			select 
+				seq_notice.nextval noticeid 
+			from dual
+		</selectKey>
+		INSERT INTO notice (
+			  pid
+			, noticeid
+			, title
+			, contents
+			, writer_uid
+			, reg_date
+		) VALUES (
+			  0
+			, #{noticeid}
+			, #{title}
+			, #{contents}
+			, #{writer_uid}
+			, sysdate
+		)
+	</insert>
+
+	 
+	 
+	 <!--  -->
+	<insert id="insertNoticeReply" >
+		<selectKey keyProperty="noticeid" resultType="int"  order="BEFORE">
+			select 
+				seq_notice.nextval noticeid 
+			from dual
+		</selectKey>
+		INSERT INTO notice (
+			  pid
+			, noticeid
+			, title
+			, contents
+			, writer_uid
+			, reg_date
+		) VALUES (
+		      #{pid} 
+			, #{noticeid}
+			, #{title}
+			, #{contents}
+			, #{writer_uid}
+			, sysdate
+		)
+	</insert>
+	
+	
+	
+
+	
+	<!-- 	//4. 공지사항 수정	 -->
+	<update id="updateNotice">
+		update notice set 
+			  title=#{title}
+			, contents=#{contents} 
+		where noticeid=#{noticeid}
+	</update>
+
+	
+	
+
+	<!-- 	//5. 공지사항 삭제	 -->
+	<delete id="deleteNotice">
+		delete from notice 
+		where noticeid=#{noticeid}
+	</delete>
+
+	
+	
+	
+	
+ 
+	<!-- //6. 메인페이지 TOP5 뽑기	 -->
+	<select id="noticeTop5" resultType="NoticeDTO">
+		<![CDATA[
+			select 
+				rownum, sub.*  
+			from (
+				select 
+					* 
+				from notice 
+				order by notice.noticeid desc
+			) sub 
+			where rownum <=5
+		]]>
+	</select>
+
+	
+	
+	
+
+	<!-- 	//7. 조회수 증가	 -->
+	<update id="viewCount">
+		update notice set 
+			view_count = view_count + 1 
+		where noticeId = #{noticeId}
+	</update>
+
+	
+	
+	
+	
+
+	<!-- 	//8. 체크박스된 게시글 삭제	 -->
+	<delete id="deleteNotices" >
+		delete from notice 
+		where noticeid in
+		<foreach item="noticeid" collection="list"  open="("  separator="," close=")"> 
+			#{noticeid}		
+		</foreach> 
+	</delete>
+
+	
+	
+	
+	
+
+	<!-- 	Mapper XML 파일	
+
+ 	<select id="selectNoticeWithPaging" parameterType="map" resultType="Notice">
+	    <![CDATA[
+	    SELECT O.* FROM (
+	        SELECT ROWNUM nrow, b.* FROM (
+	            SELECT a.* FROM notice a
+	            <if test="searchTitle != null and !searchTitle.isEmpty()">
+	                WHERE title LIKE '%' || #{searchTitle} || '%'
+	            </if>
+	            ORDER BY title
+	        ) b
+	        WHERE ROWNUM &lt;= #{navEnd}
+	    ) O
+	    WHERE nrow BETWEEN #{navStart} AND #{navEnd}
+	    ]]>
+	</select>
+ -->
+	
+	
+	
+		
+
+ 	<!-- //9. [페이징] 공지사항 목록
+	@Override
+	public List<NoticeDTO> getNoticeList(NoticeDTO notice) throws Exception {
+		return sqlSession.selectList("mapper.notice.getNoticeList", notice);
+	}
+	 -->
+	
+	
+	
+	
+<!-- 	//9. [페이징] 공지사항 목록
+	<select id="getNoticeList" parameterType="NoticeDTO" resultType="NoticeDTO">
+	    <![CDATA[
+	    SELECT * FROM (
+	        SELECT ROWNUM AS nrow, a.* FROM (
+	            SELECT
+	                noticeid,
+	                title,
+	                writer_uid,
+	                reg_date,
+	                view_count,
+	                fixed_yn
+	            FROM notice
+	            <if test="searchTitle != null and !searchTitle.isEmpty()">
+	                WHERE title LIKE '%' || #{searchTitle} || '%'
+	            </if>
+	            ORDER BY title
+	        ) a
+	        WHERE ROWNUM &lt;= #{navEnd}
+	    ) b
+	    WHERE nrow BETWEEN #{navStart} AND #{navEnd}
+	    ]]>
+	</select>
+ -->
+
+
+
+
+<!-- 
+	//10. [페이징]검색된 전체 건수 얻는다
+	//	 공지사항 총 개수
+	@Override
+	public int getTotalCount(NoticeDTO notice) throws Exception {
+		System.out.println("notice.noticeDAOImpl.getTotalCount() 함수 호출됨");
+		return sqlSession.selectOne("mapper.notice.getTotalCount");
+	}
+	 -->
+	
+	
+	
+	
+
+	<!-- 	//9. 더보기 만들기	 -->
+	<select id="getNoticeList2" resultType="NoticeDTO">
+		select * from (
+			select 
+				level, pid, noticeid, step, title, writer_uid, reg_date, view_count
+			from notice 
+			where delete_yn = 'N' 
+			<if test="noticeid != 0">
+				<![CDATA[
+				and noticeid > #{noticeid}
+				]]>
+			</if>
+			start with pid=0
+			CONNECT BY PRIOR noticeid = pid
+			order SIBLINGS by noticeid desc  
+		) A 
+		<![CDATA[
+		where rownum <= 10
+		]]>
+	</select>
+
+	 
+	 
+	 
+	 
+
+	 <!-- 	//10. 게시글 삭제해도 다시 글 10개씩 보이게 하는 메서드 -->
+	<select id="getnoticeListBeforeN">
+		 select * from (
+		     select * from notice
+			 <![CDATA[
+		     where noticeid < #{noticeid} 
+			 ]]>
+		     order by noticeid desc
+		 ) A
+		 <![CDATA[
+		 where rownum <= N		
+		 ]]>
+	</select>
+	
+
+
+
+
+</mapper>

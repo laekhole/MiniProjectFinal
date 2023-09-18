@@ -1,0 +1,9 @@
+eclipse.preferences.version=1
+encoding//src/main/webapp/WEB-INF/views/admin/boardList.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/views/admin/header.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/views/admin/loginForm.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/views/admin/memberList.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/views/admin/noticeList.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/views/main.jsp=UTF-8
+encoding//src/main/webapp/WEB-INF/views/notice/noticeList.jsp=UTF-8
+encoding/<project>=UTF-8
