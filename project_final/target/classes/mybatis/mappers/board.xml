@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+      PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.board">
+
+
+	<!-- 1. 게시판 목록 -->
+	<select id="getBoardList" resultType="BoardDTO">
+		select 
+			boardid
+			, title
+			, writer_uid
+			, reg_date
+			, view_count 
+		from board 
+		order by boardid desc
+	</select>
+	
+	
+	<!-- 2. 게시판 상세 -->
+	<select id="getBoard" resultType="BoardDTO" >
+		select *
+		from board 
+		where boardid = #{boardid}
+	</select>
+	
+	
+	<!-- 3. 게시판 글쓰기 -->
+	<insert id="insertBoard" >
+		<selectKey keyProperty="boardid" resultType="int"  order="BEFORE">
+			select 
+				seq_board.nextval boardid 
+			from dual
+		</selectKey>
+		INSERT INTO board (
+			  pid
+			, boardid
+			, title
+			, contents
+			, writer_uid
+			, reg_date
+		) VALUES (
+			  0
+			, #{boardid}
+			, #{title}
+			, #{contents}
+			, #{writer_uid}
+			, sysdate
+		)
+	</insert>
+	
+	<insert id="insertBoardReply" >
+		<selectKey keyProperty="boardid" resultType="int"  order="BEFORE">
+			select 
+				seq_board.nextval boardid 
+			from dual
+		</selectKey>
+		INSERT INTO board (
+			  pid
+			, boardid
+			, title
+			, contents
+			, writer_uid
+			, reg_date
+		) VALUES (
+		      #{pid} 
+			, #{boardid}
+			, #{title}
+			, #{contents}
+			, #{writer_uid}
+			, sysdate
+		)
+	</insert>
+	
+	
+	<!-- //4. 게시판 수정 -->
+	<update id="updateBoard">
+		update board set 
+			  title=#{title}
+			, contents=#{contents} 
+		where boardid=#{boardid}
+	</update>
+	
+	
+	<!-- //5. 게시판 삭제 -->
+	<delete id="deleteBoard">
+		delete from board 
+		where boardid=#{boardid}
+	</delete>
+	
+	
+	<!-- //6. 메인페이지 TOP5 뽑기 -->
+	<select id="boardTop5" resultType="BoardDTO">
+		<![CDATA[
+			select 
+				rownum, sub.*  
+			from (
+				select 
+					* 
+				from board 
+				order by board.boardid desc
+			) sub 
+			where rownum <=5
+		]]>
+	</select>
+	
+	
+	<!-- //7. 조회수 증가 -->
+	<update id="viewCount">
+		update board set 
+			view_count = view_count + 1 
+		where boardId = #{boardId}
+	</update>
+	
+	
+	
+	<!-- //8. 체크박스된 게시글 삭제 -->
+	<delete id="deleteBoards" >
+		delete from board 
+		where boardid in
+		<foreach item="boardid" collection="list"  open="("  separator="," close=")"> 
+			#{boardid}		
+		</foreach> 
+	</delete>
+	
+	
+	
+	
+	
+	<!-- //9. 더보기 만들기 -->
+	<select id="getBoardList2" resultType="BoardDTO">
+		select * from (
+			select 
+				level, pid, boardid, step, title, writer_uid, reg_date, view_count
+			from board 
+			where delete_yn = 'N' 
+			<if test="boardid != 0">
+				<![CDATA[
+				and boardid > #{boardid}
+				]]>
+			</if>
+			start with pid=0
+			CONNECT BY PRIOR boardid = pid
+			order SIBLINGS by boardid desc  
+		) A 
+		<![CDATA[
+		where rownum <= 10
+		]]>
+	</select>
+	
+	
+	<!-- //10. 게시글 삭제해도 다시 글 10개씩 보이게 하는 메서드 -->
+	<select id="getboardListBoforeN">
+		 select * from (
+		     select * from board
+			 <![CDATA[
+		     where boardid < #{boardid} 
+			 ]]>
+		     order by boardid desc
+		 ) A
+		 <![CDATA[
+		 where rownum <= N		
+		 ]]>
+	</select>
+	
+</mapper>
