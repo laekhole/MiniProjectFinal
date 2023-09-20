@@ -12,9 +12,10 @@
 			boardid
 			, title
 			, writer_uid
-			, reg_date
+			, mod_date
 			, view_count 
 		from board 
+		where delete_yn='N'
 		order by boardid desc
 	</select>
 	
@@ -26,6 +27,7 @@
 		select *
 		from board 
 		where boardid = #{boardid}
+		and delete_yn='N'
 	</select>
 
 
@@ -53,7 +55,7 @@
 		)
 	</insert>
 
-
+	<!-- 3-2. 게시판 답글쓰기 -->
 	<insert id="insertBoardReply" >
 		<selectKey keyProperty="boardid" resultType="int"  order="BEFORE">
 			select 
@@ -82,36 +84,63 @@
 	<update id="updateBoard">
 		update board set 
 			  title=#{title}
-			, contents=#{contents} 
+			, contents=#{contents}
+			, mod_date= sysdate
 		where boardid=#{boardid}
 	</update>
 	
 	
 	<!-- //5. 게시판 삭제 -->
-	<delete id="deleteBoard" parameterType = "int">
-		delete from board 
+	<update id="deleteBoard" >
+		update board set
+					delete_yn='Y' 
 		where boardid=#{boardid}
-	</delete>
+	</update>
 	
 	
 	<!-- //6. 메인페이지 TOP5 뽑기 -->
+	<!-- 조회수로 order by -->
 	<select id="boardTop5" resultType="BoardDTO">
 		<![CDATA[
 			select 
 				rownum, sub.*  
 			from (
 				select 
-					* 
-				from board 
-				order by board.boardid desc
+					level, boardid, title, writer_uid, view_count
+			from board
+     	where delete_yn = 'N' 
+ 			start with pid=0 
+ 			CONNECT BY PRIOR boardid = pid
+			order by board.view_count desc
 			) sub 
 			where rownum <=5
 		]]>
 	</select>
 	
 	
+<!-- 	    select * from ( -->
+<!--       select -->
+<!--       	rownum as nrow, a.* -->
+<!--       from ( -->
+<!--         select level, boardid, title, writer_uid, view_count -->
+<!--         from board -->
+<!--         	where delete_yn = 'N' -->
+<!--  			start with pid=0 -->
+<!-- 			CONNECT BY PRIOR boardid = pid -->
+<!-- 			order SIBLINGS by boardid desc -->
+<!--       ) a -->
+<!--       where rownum &lt;= #{endNo} -->
+<!--     ) o -->
+<!--     where nrow between #{startNo} and #{endNo} -->
+	
+	
+	
+	
+	
+	
+	
 	<!-- //7. 조회수 증가 -->
-	<update id="viewCount" parameterType = "int">
+	<update id="viewCount" >
 		update board set 
 			view_count = view_count + 1 
 		where boardId = #{boardId}

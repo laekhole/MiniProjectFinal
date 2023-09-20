@@ -4,7 +4,6 @@
 
 
 
-
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
@@ -51,6 +50,10 @@
       display: flex;
       justify-content: space-between;
     }
+
+		.post #boardDetail {
+			text-align: left;
+		}
 
     .check-box {
       width: 100px;

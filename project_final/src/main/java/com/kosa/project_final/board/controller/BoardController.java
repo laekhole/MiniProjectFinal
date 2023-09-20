@@ -1,15 +1,7 @@
 package com.kosa.project_final.board.controller;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,10 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import com.kosa.project_final.board.domain.AttacheFileDTO;
 import com.kosa.project_final.board.domain.BoardDTO;
 import com.kosa.project_final.board.service.BoardService;
 import com.kosa.project_final.member.domain.MemberDTO;
@@ -52,24 +41,12 @@ public class BoardController {
 	@Autowired
 	private BoardService boardService;
 	
-	private static final String CURR_IMAGE_REPO_PATH = "C:\\file_repo";
+//	첨부파일 local Repository
+//	private static final String CURR_IMAGE_REPO_PATH = "C:\\file_repo";
 
 	
 //	게시판 목록 =====================================================================================
-	
-	// 1. 게시판 전체 목록 페이지
-//	public String list(HttpServletRequest req, HttpServletResponse res) throws Exception {
-//    	System.out.println("board.controller.list() invoked.");
-//
-//    	try { 
-//        	req.setAttribute("board", boardService.getBoardList());
-//        } catch (Exception e) { 
-//        	e.printStackTrace();
-//        }
-//		
-//		return "board/boardList.jsp";
-//		
-//	} // list
+
 	
 	// 1. 게시판 전체 목록 페이지[더보기]
 	@RequestMapping("/board/list.do")
@@ -79,12 +56,9 @@ public class BoardController {
     	try { 
     		
     		model.addAttribute("result", boardService.getBoardList2(board));
-//    		model.addAttribute("result",)
+
     		board.setTotalCount(boardService.getTotalCount(board));
 
-
-
-//    		model.addAttribute(null);
         } catch (Exception e) { 
         	e.printStackTrace();
         }
@@ -146,21 +120,6 @@ public class BoardController {
 		return jsonResult;
 	} // detail
 
-		
-		
-//		try {
-//			model.addAttribute("status", true);
-//			BoardDTO boardView = boardService.getBoard(board.getBoardid());
-//			System.out.println("bordView = " + boardView);
-//			model.addAttribute("board", boardView);
-//        } catch (Exception e) { 
-//        	model.addAttribute("status", false);
-//        	model.addAttribute("message", "서버에 오류 발생");
-//        	e.printStackTrace();
-//        }
-//
-//		return "board/detail";
-//	} // detail
 
 	// 2. 게시판 상세 페이지
 	@RequestMapping(value="/board/replyForm.do", method = RequestMethod.POST)
@@ -182,75 +141,84 @@ public class BoardController {
 		return "board/replyForm";
 	} // detail
 
-	@RequestMapping(value="/board/reply.do", method = RequestMethod.POST)
-	public String reply(BoardDTO board, Model model,
-			MultipartHttpServletRequest multipartRequest
-			) throws Exception {
-		System.out.println("board.controller.detail() invoked.");
-		System.out.println("board " + board);
-		
-		multipartRequest.setCharacterEncoding("utf-8");
-		Map map = new HashMap();
-		Enumeration enu=multipartRequest.getParameterNames();
-		while(enu.hasMoreElements()){
-			String name=(String)enu.nextElement();
-			String value=multipartRequest.getParameter(name);
-			//System.out.println(name+", "+value);
-			map.put(name,value);
-		}
-		
-		board.setAttacheFileList(fileProcess(multipartRequest));
-		
-		try {
-			model.addAttribute("status", true);
-			board.setWriter_uid("bbb");
-			boardService.reply(board);
-        } catch (Exception e) { 
-        	model.addAttribute("status", false);
-        	model.addAttribute("message", "서버에 오류 발생");
-        	e.printStackTrace();
-        }
 
-		return "redirect:list.do";
-	} // detail
 	
-	private List<AttacheFileDTO> fileProcess(MultipartHttpServletRequest multipartRequest) throws Exception{
-		List<AttacheFileDTO> fileList = new ArrayList<>();
-		Iterator<String> fileNames = multipartRequest.getFileNames();
-		Calendar now = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat("\\yyyy\\MM\\dd");
-		
-		while(fileNames.hasNext()){
-			String fileName = fileNames.next();
-			MultipartFile mFile = multipartRequest.getFile(fileName);
-			String fileNameOrg = mFile.getOriginalFilename();
-			String realFolder = sdf.format(now.getTime());
-			
-			File file = new File(CURR_IMAGE_REPO_PATH + realFolder);
-			if (file.exists() == false) {
-				file.mkdirs();
-			}
-
-			String fileNameReal = UUID.randomUUID().toString();
-			
-			//파일 저장 
-			mFile.transferTo(new File(file, fileNameReal)); //임시로 저장된 multipartFile을 실제 파일로 전송
-
-			fileList.add(
-					AttacheFileDTO.builder()
-					.fileNameOrg(fileNameOrg)
-					.fileNameReal(realFolder + "\\" + fileNameReal)
-					.length((int) mFile.getSize())
-					.contentType(mFile.getContentType())
-					.build()
-					);
-		}
-		return fileList;
-	}	
+	
+//	첨부파일 관련 답글
+//	@RequestMapping(value="/board/reply.do", method = RequestMethod.POST)
+//	public String reply(BoardDTO board, Model model,
+//			MultipartHttpServletRequest multipartRequest
+//			) throws Exception {
+//		System.out.println("board.controller.detail() invoked.");
+//		System.out.println("board " + board);
+//		
+//		multipartRequest.setCharacterEncoding("utf-8");
+//		Map map = new HashMap();
+//		Enumeration enu=multipartRequest.getParameterNames();
+//		while(enu.hasMoreElements()){
+//			String name=(String)enu.nextElement();
+//			String value=multipartRequest.getParameter(name);
+//			//System.out.println(name+", "+value);
+//			map.put(name,value);
+//		}
+//		
+//		board.setAttacheFileList(fileProcess(multipartRequest));
+//		
+//		try {
+//			model.addAttribute("status", true);
+//			board.setWriter_uid("bbb");
+//			boardService.reply(board);
+//        } catch (Exception e) { 
+//        	model.addAttribute("status", false);
+//        	model.addAttribute("message", "서버에 오류 발생");
+//        	e.printStackTrace();
+//        }
+//
+//		return "redirect:list.do";
+//	} // detail
+	
+	
+	
+//	첨부파일
+//	private List<AttacheFileDTO> fileProcess(MultipartHttpServletRequest multipartRequest) throws Exception{
+//		List<AttacheFileDTO> fileList = new ArrayList<>();
+//		Iterator<String> fileNames = multipartRequest.getFileNames();
+//		Calendar now = Calendar.getInstance();
+//		SimpleDateFormat sdf = new SimpleDateFormat("\\yyyy\\MM\\dd");
+//		
+//		while(fileNames.hasNext()){
+//			String fileName = fileNames.next();
+//			MultipartFile mFile = multipartRequest.getFile(fileName);
+//			String fileNameOrg = mFile.getOriginalFilename();
+//			String realFolder = sdf.format(now.getTime());
+//			
+//			File file = new File(CURR_IMAGE_REPO_PATH + realFolder);
+//			if (file.exists() == false) {
+//				file.mkdirs();
+//			}
+//
+//			String fileNameReal = UUID.randomUUID().toString();
+//			
+//			//파일 저장 
+//			mFile.transferTo(new File(file, fileNameReal)); //임시로 저장된 multipartFile을 실제 파일로 전송
+//
+//			fileList.add(
+//					AttacheFileDTO.builder()
+//					.fileNameOrg(fileNameOrg)
+//					.fileNameReal(realFolder + "\\" + fileNameReal)
+//					.length((int) mFile.getSize())
+//					.contentType(mFile.getContentType())
+//					.build()
+//					);
+//		}
+//		return fileList;
+//	}	
+	
+	
 	
 //	게시판 글쓰기 =====================================================================================
 
-	// 3-1. 게시판 글쓰기 페이지	
+	// 3-1. 게시판 글쓰기
 	@ResponseBody
 	@RequestMapping(value = "/board/insert.do", method = RequestMethod.POST)
 	public Map<String,Object> insert(@RequestBody BoardDTO board, HttpServletRequest req, HttpServletResponse res) throws Exception {
@@ -276,7 +244,7 @@ public class BoardController {
 	} // insert
 
 	
-	// 3-2. 게시판 답글쓰기 페이지
+	// 3-2. 게시판 답글쓰기
 	@ResponseBody
 	@RequestMapping(value = "/board/insertReply.do", method = RequestMethod.POST)
 	public Map<String,Object> insertReply(@RequestBody BoardDTO board, HttpServletRequest req, HttpServletResponse res) throws Exception {
@@ -317,70 +285,45 @@ public class BoardController {
 		
 		return jsonResult;
 	} // delete
-	
-//	@ResponseBody
-//	@RequestMapping(value = "/member/delete.do")
-//	public Map<String,Object> MemberDelete(HttpServletRequest req, HttpServletResponse res) throws Exception {
+
+
+//	// 4-2. 체크박스 글 삭제
+//	public String deleteBoards(String[] boardids, HttpServletRequest req, HttpServletResponse res) throws Exception {
+//		System.out.println("board.controller.deleteBoards() invoked.");
+//		JSONObject jsonResult = new JSONObject();
+//		boolean status = boardService.deleteBoards(boardids);
 //		
-//		System.out.println("controller.MemberDelete() invoked. ");
-//		boolean status = false;
-//		HttpSession session = req.getSession();
-//		Map<String,Object> jsonResult=new HashMap<>();
-//		
-//		MemberDTO member = (MemberDTO) session.getAttribute("loginMember");
-//		System.out.println(member);
-//		
-//		if(memberService.deleteMember(member.getId())) {
-//			status=true;
-//			session.invalidate();
-//		}
 //		jsonResult.put("status", status);
+//		jsonResult.put("message", status ? "글이 삭제되었습니다" : "오류가 발생하였습니다. 다시 시도해주세요.");
 //		
-//		return jsonResult;
+//		return jsonResult.toString();
+//	
 //	}
-
-
-
-
-
-
-	// 4-2. 체크박스 글 삭제
-	public String deleteBoards(String[] boardids, HttpServletRequest req, HttpServletResponse res) throws Exception {
-		System.out.println("board.controller.deleteBoards() invoked.");
-		JSONObject jsonResult = new JSONObject();
-		boolean status = boardService.deleteBoards(boardids);
-		
-		jsonResult.put("status", status);
-		jsonResult.put("message", status ? "글이 삭제되었습니다" : "오류가 발생하였습니다. 다시 시도해주세요.");
-		
-		return jsonResult.toString();
-	
-	}
 
 	
 //	게시판 글 수정 =====================================================================================
 	
-	// 5. 게시판 글 수정 페이지
-	public String updateForm(BoardDTO board, HttpServletRequest req, HttpServletResponse res) throws Exception {
-		System.out.println("board.controller.updateForm() invoked.");
-		
-		return "board/boardUpdate.jsp";
-		
-	} // updateForm
-	
-	// 5-1. 게시판 글 수정
-	public String update(BoardDTO board, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	// 5.  게시판 글 수정
+	@ResponseBody
+	@RequestMapping(value = "/board/update.do", method = RequestMethod.POST)
+	public Map<String,Object> update(@RequestBody BoardDTO board, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		System.out.println("board.controller.update() invoked.");
 		
-		JSONObject jsonResult = new JSONObject();
+		HttpSession session = req.getSession();
+		Map<String,Object> jsonResult = new HashMap<>();
+
+		MemberDTO member = (MemberDTO) session.getAttribute("loginMember");
+		board.setWriter_uid(member.getId());
+		
 		boolean status = boardService.boardUpdate(board);
+		
+		System.out.println("board는 : "+board);
 		
 		jsonResult.put("status", status);
 		jsonResult.put("message", status ? "글이 수정되었습니다." : "오류가 발생하였습니다. 다시 시도해주세요.");
 		
-		return jsonResult.toString();
+		return jsonResult;
 		
 	} // update
-
 	
 }

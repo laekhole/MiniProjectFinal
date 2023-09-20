@@ -7,6 +7,7 @@
 		<typeAlias type="com.kosa.project_final.member.domain.MemberDTO"  alias="MemberDTO" />
 		<typeAlias type="com.kosa.project_final.board.domain.AttacheFileDTO"  alias="AttacheFileDTO" />
 		<typeAlias type="com.kosa.project_final.board.domain.BoardDTO"  alias="BoardDTO" />
+		<typeAlias type="com.kosa.project_final.board.domain.CommentDTO"  alias="CommentDTO" />
 		<typeAlias type="com.kosa.project_final.notice.domain.NoticeDTO"  alias="NoticeDTO" />
 	</typeAliases>
 </configuration>
