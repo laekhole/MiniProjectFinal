@@ -18,7 +18,7 @@
 	<div id="wrap" class="wrap">
     <header class="header">
         <div class="header_inner">
-	        <a href="../index.jsp">
+	        <a href="<c:url value='/'/>">
  				<img src="<c:url value='/resources/images/logoDaebo.jpg' /> " alt="로고">
 			</a>
         </div>

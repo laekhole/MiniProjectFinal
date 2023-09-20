@@ -14,7 +14,7 @@
 
     a:link { text-decoration: black;}
  	a:visited { text-decoration: black;}
-</style>
+</style> 
 
            <h1 id="text">회원 게시판</h1>
            <div id="container">

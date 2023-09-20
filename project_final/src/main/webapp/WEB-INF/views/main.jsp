@@ -173,6 +173,15 @@
 
 
 
+
+
+
+
+
+
+
+
+
 <script src="<c:url value='/resources/js/slideshow.js'/>"></script>
 <script type="text/javascript">
 

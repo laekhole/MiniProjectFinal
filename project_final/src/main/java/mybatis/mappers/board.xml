@@ -18,6 +18,8 @@
 		order by boardid desc
 	</select>
 	
+
+	
 	
 	<!-- 2. 게시판 상세 -->
 	<select id="getBoard" resultType="BoardDTO" >
@@ -86,7 +88,7 @@
 	
 	
 	<!-- //5. 게시판 삭제 -->
-	<delete id="deleteBoard">
+	<delete id="deleteBoard" parameterType = "int">
 		delete from board 
 		where boardid=#{boardid}
 	</delete>
@@ -109,7 +111,7 @@
 	
 	
 	<!-- //7. 조회수 증가 -->
-	<update id="viewCount">
+	<update id="viewCount" parameterType = "int">
 		update board set 
 			view_count = view_count + 1 
 		where boardId = #{boardId}
@@ -130,7 +132,9 @@
 	
 	
 	
-	<!-- //9. 더보기 만들기 -->
+
+<!--
+	 //9. [더보기] 답글까지 포함한 보드리스트 얻기
 	<select id="getBoardList2" resultType="BoardDTO">
 		select * from (
 			select 
@@ -150,6 +154,47 @@
 		where rownum <= 10
 		]]>
 	</select>
+ -->
+
+	<!-- //9. 답글까지 포함한 보드리스트 얻기 -->
+	<select id="getBoardList2" resultType="BoardDTO">
+
+    select * from (
+      select
+      	rownum as nrow, a.*
+      from (
+        select level, boardid, title, writer_uid, view_count
+        from board
+        	where delete_yn = 'N'
+        <if test="searchTitle != null and !searchTitle.isEmpty()">
+          and title like '%' || #{searchTitle} || '%'
+        </if>
+ 			start with pid=0
+			CONNECT BY PRIOR boardid = pid
+			order SIBLINGS by boardid desc
+      ) a
+      where rownum &lt;= #{endNo}
+    ) o
+    where nrow between #{startNo} and #{endNo}
+
+	</select>
+	
+	<!-- //9-2. 계층형 쿼리에서 level 정보 포함하여 보드리스트 얻기 -->
+<!-- <select id="getBoardList3" resultType="BoardDTO"> -->
+<!-- 		select -->
+<!-- 		    board.*, LEVEL -->
+<!-- 		from board -->
+<!-- 		where delete_yn = 'N' -->
+<!--     <if test="searchTitle != null and !searchTitle.isEmpty()"> -->
+<!--       and title like '%' || #{searchTitle} || '%' -->
+<!--     </if> -->
+<!-- 		start with pid = 0 -->
+<!-- 		connect by prior boardid = pid -->
+<!-- 		order by boardid desc; -->
+<!-- </select> -->
+	
+
+	
 	
 	
 	<!-- //10. 게시글 삭제해도 다시 글 10개씩 보이게 하는 메서드 -->
@@ -165,5 +210,47 @@
 		 where rownum <= N		
 		 ]]>
 	</select>
+	
+	
+<!--  [페이징] 페이징하기 위해서 DB	총 갯수 세는 sql문 --> 
+	<select id="getTotalCount" resultType="int">
+	    SELECT count(*)
+	    FROM board
+	    <where>
+	        <if test="searchTitle != null and !searchTitle.isEmpty()">
+	            AND title LIKE CONCAT(CONCAT('%', #{searchTitle}), '%')
+	        </if>
+	    </where>
+	</select>
+	
+
+<!--     <select id="getBoardList" resultType="BoardDTO"> -->
+<!--         <![CDATA[ -->
+<!--         SELECT O.* -->
+<!--         FROM ( -->
+<!--             SELECT ROWNUM nrow, A.* -->
+<!--             FROM board A -->
+<!--             <where> -->
+<!--                 <if test="searchTitle != null and !searchTitle.isEmpty()"> -->
+<!--                     AND title LIKE '%' || #{searchTitle} || '%' -->
+<!--                 </if> -->
+<!--             </where> -->
+<!--             <choose> -->
+<!--                 <when test="searchTitle != null and !searchTitle.isEmpty()"> -->
+<!--                     <if test="totalCount > 0"> -->
+<!--                         WHERE ROWNUM &lt;= #{endNo} -->
+<!--                     </if> -->
+<!--                 </when> -->
+<!--                 <otherwise> -->
+<!--                     WHERE ROWNUM &lt;= #{endNo} -->
+<!--                 </otherwise> -->
+<!--             </choose> -->
+<!--         ) O -->
+<!--         WHERE nrow BETWEEN #{startNo} AND #{endNo} -->
+<!--         ]]> -->
+<!--     </select> -->
+	
+	
+	
 	
 </mapper>

@@ -39,5 +39,7 @@ public interface BoardDAO {
 
 	public int reply(BoardDTO board);
 
+	public int getTotalCount(BoardDTO board);
+
 	
 } // end class

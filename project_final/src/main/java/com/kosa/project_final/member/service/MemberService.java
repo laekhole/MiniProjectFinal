@@ -29,13 +29,13 @@ public class MemberService {
 		return memberDAO.getMemberList();
 	} // getMemberList
 
-	// 2. 회원 상세보기
-	public MemberDTO getMember(String id) throws Exception {
-		System.out.println("member.service.getMember() 함수 호출됨");
-		MemberDTO memberDTO = memberDAO.getMember(id);
-
-		return memberDTO;
-	} // getMember
+//	// 2. 회원 상세보기
+//	public MemberDTO getMember(String id) throws Exception {
+//		System.out.println("member.service.getMember() 함수 호출됨");
+//		MemberDTO memberDTO = memberDAO.getMember(id);
+//
+//		return memberDTO;
+//	} // getMember
 
 	// 3. 회원 가입(추가)
 	public boolean insertMember(MemberDTO member) throws Exception {
