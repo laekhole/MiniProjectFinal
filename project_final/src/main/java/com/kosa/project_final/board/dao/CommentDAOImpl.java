@@ -39,9 +39,9 @@ public class CommentDAOImpl implements CommentDAO {
 
 	//3. 댓글 수정하기 Update
 	@Override
-	public boolean updateComment(int commentid) throws Exception {
+	public boolean updateComment(CommentDTO comment) throws Exception {
 		// TODO Auto-generated method stub
-		return 0 != sqlSession.update("mapper.comment.updateComment", commentid);
+		return 0 != sqlSession.update("mapper.comment.updateComment", comment);
 	}	//updateComment
 
 	//4. 댓글 삭제하기 Delete

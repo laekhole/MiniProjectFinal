@@ -1,6 +1,8 @@
 package com.kosa.project_final.board.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,7 +11,6 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -44,25 +45,42 @@ public class CommentController {
 	// 1. 댓글 전체 목록 페이지 [초기 10개]
 	@ResponseBody
 	@RequestMapping("/comment/list.do")
-	public Map<String, Object> list(CommentDTO comment) throws Exception {
+	public Map<String, Object> list(CommentDTO comment, HttpServletRequest req) throws Exception {
     	System.out.println("comment.controller.list() invoked." + comment);
 
+    	// 비동기 fetch로 넘겨주기 위한 셋팅
     	Map<String, Object> result = new HashMap<String, Object>();
+    	List<CommentDTO> iWantCommentList = new ArrayList<>();
     	
-		try { 
+    	// 로그인 세션 받아오기 위한 셋팅
+    	HttpSession session = req.getSession();
+		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
+    	
+    	
+		try {
 			for (CommentDTO commentBoard : commentService.getCommentList(comment)) {
 	           if(comment.getComment_boardid() == commentBoard.getComment_boardid()) {
-		   			result.put("commentList", commentService.getCommentList(comment));
-		        	result.put("status", true);
-	           		}
-	        	}
+	        	   	System.out.println("comment.getComment_boardid() 좌변 : "+ comment.getComment_boardid());
+	        	   	System.out.println("commentBoard.getComment_boardid() 우변 : "+ commentBoard.getComment_boardid());
+	        	   	System.out.println("commentBoard.getComment_boardid() 우변 : "+ commentBoard.getContents());
+	        	   	
+	        	   	iWantCommentList.add(commentBoard);
+	           		} //if문 끝
+	        	} //for문 끝
+			
+	        result.put("commentList", iWantCommentList);
+	        result.put("loginMember", loginMember);
+	        result.put("status", true);
+	        
 			} catch (Exception e) { 
         	result.put("status", false);
         	result.put("message", "서버에 오류 발생");
         	e.printStackTrace();
         }
 		System.out.println(result);
+		
 		return result;
+		
 		
 	} // list
 	
@@ -99,7 +117,7 @@ public class CommentController {
 	public Map<String,Object> insert(@RequestBody CommentDTO comment, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		System.out.println("comment.controller.insert() invoked.");
 		
-		System.out.println("comment는 :  "+comment);
+		System.out.println("글쓰기의 comment는 :  "+comment);
 		System.out.println();
 		
 		HttpSession session = req.getSession();
@@ -114,10 +132,10 @@ public class CommentController {
 		status = commentService.commentInsert(comment);
 		}		
 		
-		System.out.println("comment는 :  "+comment);
+		System.out.println("0 :  "+comment);
 
 		jsonResult.put("status", status);
-		jsonResult.put("message", status ? "글이 등록되었습니다" : "로그인해주세요.");
+		jsonResult.put("message", status ? "댓글이 등록되었습니다" : "로그인해주세요.");
 		
 		return jsonResult;
 	
@@ -170,9 +188,9 @@ public class CommentController {
 		MemberDTO member = (MemberDTO) session.getAttribute("loginMember");
 		comment.setWriter_uid(member.getId());
 		
-		boolean status = commentService.commentUpdate(comment.getCommentid());
+		boolean status = commentService.commentUpdate(comment);
 		
-		System.out.println("comment는 : "+comment);
+		System.out.println("수정의 comment는 : "+comment);
 		
 		jsonResult.put("status", status);
 		jsonResult.put("message", status ? "글이 수정되었습니다." : "오류가 발생하였습니다. 다시 시도해주세요.");

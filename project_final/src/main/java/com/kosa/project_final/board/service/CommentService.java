@@ -41,9 +41,9 @@ public class CommentService {
 
 	
 	//3. 댓글 수정하기
-	public boolean commentUpdate(int commentid) throws Exception {
+	public boolean commentUpdate(CommentDTO comment) throws Exception {
 		System.out.println("comment.service.commentUpdate() 함수 호출됨");
-		return commentDAO.updateComment(commentid);
+		return commentDAO.updateComment(comment);
 	}	
 
 

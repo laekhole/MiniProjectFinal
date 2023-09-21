@@ -232,16 +232,16 @@
             </tr>
         </table>
     </div>
-    <div id="comments-container">
-        <h2>댓글</h2>
-        <div id="comments">
-            <!-- 댓글 리스트가 여기에 들어갈 것입니다. -->
-        </div>
-        <textarea id="comment_contents1"></textarea>
-        <button id="comment_submit1">작성</button>
-    </div>
-</div>
-	
+		<div id="comments-container" style="padding: 20px; border: 1px solid #ccc; border-radius: 10px; background-color: #f9f9f9;">
+	    <h2 style="font-size: 1.5em; margin-bottom: 20px;">댓글</h2>
+	    <div id="comments">
+	        <!-- 댓글 리스트가 여기에 들어갈 것입니다. -->
+	    </div>
+	    <div class="comment-input" style="margin-top: 20px;">
+	        <textarea id="comment_contents1" class="comment-contents" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px;"></textarea>
+	        <button id="comment_submit1" class="comment-buttons" >작성</button>
+    	</div>
+		</div>
 	
 <div id="boardUpdateForm">
    <h1>간단한 게시판 - 글 수정하기</h1>
@@ -435,7 +435,8 @@ boardReplyDialog = $("#boardReplyForm").dialog({
 		           if (json.status) {
 // 		               alert("댓글 출력 성공!");
 		               console.log(json.commentList);
-							  	displayComments(json.commentList);
+// 		               loginMember = json.loginMember;
+							  	displayComments(json.commentList, json.loginMember);
 		  		      	
 		           } else {
 // 		               alert("댓글 출력 실패!");
@@ -490,7 +491,10 @@ boardDetailDialog = $("#boardDetailForm").dialog({
    autoOpen: false,
    modal: true,
    width: 500,
-   height: 700
+   height: 700,
+   close : function() {
+			$("#comments").empty();
+   }
 });
 
 	
@@ -501,14 +505,7 @@ boardDetailDialog.on("dialogopen", function () {
 		if ("${sessionScope.loginMember.id}" != null){ 											// 비회원이 게시판 들어올 수도 있는데,
 			  loginMemberIdOption = "${sessionScope.loginMember.id}"; // if문 처리 안하면 비회원 들어왔을 때
 				} 																													// modal 터짐
-
-	
     var writer_uid = $("#writer_uid1").text();
-  	
-				
-				console.log("확인해보자 loginMemberId 잘 찍혔는지 ! ", loginMemberIdOption);
-				console.log("확인해보자 writer_uid 잘 찍혔는지 ! ", writer_uid);
-				
 				
     if (loginMemberIdOption === writer_uid) {
     	boardDetailDialog.dialog("option", "buttons", {
@@ -521,6 +518,7 @@ boardDetailDialog.on("dialogopen", function () {
                     },
                     닫기: function () {
                     	listUpdate()
+   	           					$("#comments").empty();
                         $(this).dialog("close");
                     }
                    
@@ -557,6 +555,7 @@ boardDetailDialog.on("dialogopen", function () {
          		},
             닫기: function () {
             	listUpdate() //게시글 리스트 비동기 구현
+           					$("#comments").empty();
                 $(this).dialog("close"); //게시글 상세 다이얼로그(boardDetailDialog) 닫기
             }
         });
@@ -568,6 +567,7 @@ boardDetailDialog.on("dialogopen", function () {
             },
               닫기: function () {
            	   listUpdate() //게시글 리스트 비동기 구현
+           					$("#comments").empty();
                     $(this).dialog("close");//게시글 상세 다이얼로그(boardDetailDialog) 닫기
                 }
           })
@@ -576,6 +576,7 @@ boardDetailDialog.on("dialogopen", function () {
        	boardDetailDialog.dialog("option", "buttons", {
                닫기: function () {
                	listUpdate() //게시글 리스트 비동기 구현
+           					$("#comments").empty();
                    $(this).dialog("close");//게시글 상세 다이얼로그(boardDetailDialog) 닫기
                }
            });
@@ -819,14 +820,14 @@ boardDetailDialog.on("dialogopen", function () {
 	    //성공하면 오픈하기 전에 데이터를 출력
 	    //그러고 나서 대화상자 화면에 보이게 한다.
 	
-	const boardid = $("#boardid1").val();
+		 const boardid = $("#boardid1").val();
 	   const contents = $("#comment_contents1").val();
 	   
 	   const param ={
 	 		   comment_boardid: boardid,
 	 		   contents: contents
 	    };
-	  console.log("boardid는 : ",boardid);
+	  console.log("댓글 작성 버튼 동작에서의 boardid는 : ",boardid);
 	  console.log("contents는 : ",contents);
 	
 	    fetch("<c:url value='/comment/insert.do'/>", {
@@ -839,17 +840,63 @@ boardDetailDialog.on("dialogopen", function () {
 	    .then((response) => response.json())
 	    .then((json) => {
 	        if (json.status) {
+	        	$("#comment_contents1").val('');
+	        	alert(json.message);
+	        	
+	        				 //작성 성공 후 전체 리스트 출력
+					   	     fetch("<c:url value='/comment/list.do'/>?comment_boardid="+boardid, {
+									     method: "GET",
+									     headers: {
+									         "Content-Type": "application/json; charset=UTF-8",
+									     }
+									 })
+									 .then((response) => response.json())
+									 .then((json) => {
+									     if (json.status) {
+									//              alert("댓글 출력 성공!");
+									         console.log(json.commentList);
+									         
+													 displayComments(json.commentList, json.loginMember);
+									     } else {
+									//              alert("댓글 출력 실패!");
+									     }
+									 });
+	        	
 		      	
 	        } else {
 	            alert(json.message);
 	        }
 	    });
 	    
+
+	    
 	 });
 
 
-		/* 댓글 출력 */
-function displayComments(comments) {
+//      fetch("<c:url value='/comment/list.do'/>?comment_boardid="+boardid, {
+//          method: "GET",
+//          headers: {
+//              "Content-Type": "application/json; charset=UTF-8",
+//          }
+//      })
+//      .then((response) => response.json())
+//      .then((json) => {
+//          if (json.status) {
+// //              alert("댓글 출력 성공!");
+//              console.log(json.commentList);
+// 					  	displayComments(json.commentList);
+		      	
+//          } else {
+// //              alert("댓글 출력 실패!");
+//          }
+//      });
+
+
+		// 댓글 출력은 게시글 출력 자리(게시글 CRUD 순서 중 R에 있음)
+		// 댓글 비동기 구현 위해 html 생성 및 삽입부
+		// 검색 키워드 : displayComments, 수정 버튼, 수정 완료 버튼, UpdateButton, DeleteButton.
+		// displayComments 검색해서 쓰는 부분 찾자
+function displayComments(comments, loginMember) {
     const commentsContainer = $("#comments");
 
     // 기존 div id="comments" 에 쌓인 데이터 제거
@@ -858,18 +905,36 @@ function displayComments(comments) {
     // div id="comments"에 데이터 추가
     comments.forEach(function(comment) {                                                  
         var commentElement = 
-            '<div class="comment" data-index="' + comment.commentid + '">' +
-                '<div class="comment-content">' +
-                    '작성자 : <span class="comment-writer">' + comment.writer_uid + '</span><br>' +
-                    '작성일자 : <span class="comment-date">' + comment.mod_date + '</span><br>' +
-                    '<button class="commentUpdateButton">수정</button><br>' +
-                    '<button class="commentDeleteButton">삭제</button><br>' +
-                '</div>' +
-                '<div class="comment-text">' +
-                    '<textarea class="comment-contents" readonly>' + comment.contents + '</textarea>' +
-                '</div>' +
-            '</div>'
-            ;
+		        	'<div class="comment">' +
+		            '<div class="comment-content">' +
+		                '<div>작성자 : <span class="comment-writer">' + comment.writer_uid + '</span></div>' +
+		                '<div>작성일자 : <span class="comment-date">' + comment.mod_date + '</span></div>' +
+		            '</div>' +
+		            '<div class="comment-text">' +
+		                '<textarea class="comment-contents" data-commentid="' + comment.commentid + '" readonly>' + comment.contents + '</textarea>' +
+		            '</div>' +
+		            '<div>';
+        // Session에서 loginMember 가져오기
+
+        // ID 검증부
+        if (loginMember) {
+            if (loginMember.id === comment.writer_uid) {
+                // 로그인한 사용자와 댓글 작성자가 동일한 경우 버튼 보이기
+                commentElement += '<button class="commentUpdateButton comment-buttons">수정</button>' +
+                    '<button class="commentDeleteButton comment-buttons">삭제</button>';
+            } else {
+                // 로그인한 사용자와 댓글 작성자가 다른 경우 버튼 숨기기
+                commentElement += '<button class="commentUpdateButton comment-buttons" style="display:none">수정</button>' +
+                    '<button class="commentDeleteButton comment-buttons" style="display:none">삭제</button>';
+            }
+        } else {
+            // 로그인하지 않은 경우 버튼 숨기기
+            commentElement += '<button class="commentUpdateButton comment-buttons" style="display:none">수정</button>' +
+                '<button class="commentDeleteButton comment-buttons" style="display:none">삭제</button>';
+        }
+					 //열려 있는 div 태그 닫기
+     		   commentElement += '</div>' +
+       		     '</div>';
         commentsContainer.append(commentElement);
     });
 }
@@ -877,30 +942,52 @@ function displayComments(comments) {
 
 
 
-	 /* 댓글 수정 버튼 동작(readonly 풀리고, 수정 버튼은 수정 완료로 변경) */
-$("#comments").on("click", ".modify-comment", function() {
-    var commentid = $(this).data("commentid");
-    var comment = comments[commentid];
-    var commentContentElement = $("#comment_content_" + commentid);
-    var commentEditButton = $("#comment_edit_button_" + commentid);
 
-    commentContentElement.prop("readonly", false);
-    commentEditButton.text("수정 완료").addClass("submit-modify-comment").removeClass("modify-comment");
+
+
+// 댓글 수정 < - > 수정 완료로 동작이 변하는 루틴
+let updateButtonStart = null;
+
+$(document).on("click", ".commentUpdateButton", function() {
+    var $commentContainer = $(this).closest(".comment");
+    var $textarea = $commentContainer.find(".comment-text textarea");
+    var buttonText = $(this).text();
+
+    if (buttonText === "수정") {
+        // 수정 시작 상태로 변경
+        $textarea.prop("readonly", false);
+        $(this).text("수정 완료");
+        $(this).addClass("commentUpdateFinish");
+        updateButtonStart = $(document).on("click", ".commentUpdateFinish", function() {
+            $textarea.prop("readonly", true);
+            $(this).text("수정");
+            $(this).removeClass("commentUpdateFinish");
+            $(document).off("click", ".commentUpdateFinish");
+        });
+    }
 });
-	 
-	/* 	댓글 수정(수정 완료 클릭 시) */
-$("#comments").on("click", ".submit-modify-comment", function() {
-    var commentid = $(this).data("commentid");
-    var comment = comments[commentid];
-    var boardid = comment.comment_boardid;
-    var modifiedContents = $("#comment_content_" + commentid).val();
 
+
+
+
+
+// 댓글 수정(수정 완료 버튼 클릭 시)
+$(document).on("click", ".commentUpdateFinish", function(e) {
+	  var commenContents = $(e.target).closest(".comment").find(".comment-contents");
+    alert(commenContents.attr("data-commentid"));
     var param = {
-        comment_boardid: boardid,
-        commentid: comment.commentid,
-        contents: modifiedContents
+        commentid: commenContents.attr("data-commentid"),
+        contents: commenContents.val()
     };
-
+	
+    // 수정 완료 상태에서의 동작 추가
+    var $commentContainer = $(e.target).closest(".comment");
+    var $textarea = $commentContainer.find(".comment-text textarea");
+    $textarea.prop("readonly", true);
+    $(this).text("수정");
+    $(this).removeClass("commentUpdateFinish");
+    $(document).off("click", ".commentUpdateFinish");
+    
     fetch("<c:url value='/comment/update.do'/>", {
         method: "POST",
         headers: {
@@ -912,15 +999,46 @@ $("#comments").on("click", ".submit-modify-comment", function() {
     .then((json) => {
         if (json.status) {
             alert("댓글 수정이 완료되었습니다.");
-            commentList(); // 댓글 리스트 업데이트
         } else {
             alert("댓글 수정에 실패했습니다.");
         }
     });
+    
 });
+
+	 
+	 
+ 
+// 	/* 	댓글 수정(수정 완료 클릭 시) */
+// $(document).on("click", ".commentUpdateButton", function() {
+//     var commenContents = $(this).closest(".comment").find("#comment-contents");
+//     var param = {
+//         commentid: commenContents.attr("data-commentid"),
+//         contents: commenContents.val()
+//     };
+	
+//     console.log("param", param);
+    
+//     fetch("<c:url value='/comment/update.do'/>", {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json; charset=UTF-8",
+//         },
+//         body: JSON.stringify(param)
+//     })
+//     .then((response) => response.json())
+//     .then((json) => {
+//         if (json.status) {
+//             alert("댓글 수정이 완료되었습니다.");
+//             commentList(); // 댓글 리스트 업데이트
+//         } else {
+//             alert("댓글 수정에 실패했습니다.");
+//         }
+//     });
+// });
 	 
 	/* 댓글 삭제 동작  */
-	 $("#comments").on("click", ".delete-comment", function() {
+	 $("#commentDeleteButton").on("click", ".delete-comment", function() {
 		    var index = $(this).data("index");
 		    var comment = comments[index];
 		    var boardid = comment.comment_boardid;

@@ -15,7 +15,7 @@ public interface CommentDAO {
 	public boolean insertComment(CommentDTO comment) throws Exception; 
 	
 	//3. 댓글 수정하기 Update
-	public boolean updateComment(int commentid) throws Exception;
+	public boolean updateComment(CommentDTO comment) throws Exception;
 
 	//4. 댓글 삭제하기 Delete
 	public boolean deleteComment(int commentid) throws Exception;
