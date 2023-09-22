@@ -411,7 +411,7 @@ boardReplyDialog = $("#boardReplyForm").dialog({
     const boardDetailEventHandler = () => {
 	    $(".post-meta #boardDetail").on("click", function() {
 	
-	       alert("게시판 상세보기");
+// 	       alert("게시판 상세보기");
 	       //여기서 ajax로 세션 데이터를 가져와라.
 	       //성공하면 오픈하기 전에 데이터를 출력
 	       //
@@ -422,29 +422,6 @@ boardReplyDialog = $("#boardReplyForm").dialog({
 	       };
 		    console.log("boardid는 : "+boardid);
 		    
-		    
-		    
-		       fetch("<c:url value='/comment/list.do'/>?comment_boardid="+boardid, {
-		           method: "GET",
-		           headers: {
-		               "Content-Type": "application/json; charset=UTF-8",
-		           }
-		       })
-		       .then((response) => response.json())
-		       .then((json) => {
-		           if (json.status) {
-// 		               alert("댓글 출력 성공!");
-		               console.log(json.commentList);
-// 		               loginMember = json.loginMember;
-							  	displayComments(json.commentList, json.loginMember);
-		  		      	
-		           } else {
-// 		               alert("댓글 출력 실패!");
-		           }
-		       });
-		       
-		       
-	
 	       fetch("<c:url value='/board/detail.do'/>", {
 	           method: "POST",
 	           headers: {
@@ -479,7 +456,7 @@ boardReplyDialog = $("#boardReplyForm").dialog({
 	           }
 								$("#boardDetailForm").dialog("open");
 	       });
-	       
+	       commentList(boardid); // 게시글에 맞는 댓글 띄우기
 	    });
     }	    //게시판 상세 dialog 띄우기 declare 완
     boardDetailEventHandler(); 	    //게시판 상세 dialog 띄우기 완
@@ -514,7 +491,7 @@ boardDetailDialog.on("dialogopen", function () {
                 
                 $(this).dialog("option", "buttons", {
                     "수정 완료": function () {
-                    	listUpdate()
+                    	listUpdate();
                     },
                     닫기: function () {
                     	listUpdate()
@@ -584,78 +561,6 @@ boardDetailDialog.on("dialogopen", function () {
 });
 
 
-
-
-
-
-// //     /* 게시판 상세 다이얼로그 패치(삭제는 여기서 완성, 수정 다이얼로그 오픈(수정 버튼)도 이 안에 있음) */
-// // 이거는 상대적으로 단순하게 구현한 코드. 여기서 답글 완성하고 들어가자
-// // 답글 완성, 수정도 완성하고 들어가자
-//  boardDetailDialog = $("#boardDetailForm").dialog({
-
-//     autoOpen: false,
-//     modal: true,
-//     width: 500,
-//     height: 700,
-//     buttons: {
-// 		     "답글 쓰기" : function () {
-// 		 	  boardReplyDialog.dialog("open"); //답글 다이얼로그(boardReplyDialog) 열기
-// 		 	  alert($("#boardid1").val());
-// 				  },
-//         "게시글 수정": function(){
-//             var loginMemberId = "${sessionScope.loginMember.id}";
-//             var writer_uid = $("#writer_uid1").text();            
-//             console.log(loginMemberId);
-            
-//             console.log(writer_uid);
-//             if (loginMemberId === writer_uid) {
-//                 $("#boardUpdateForm").dialog("open");
-//             } else {
-//                 alert("자신이 작성한 게시글만 수정할 수 있습니다.");
-//             }
-//         },
-//         "게시글 삭제": function(){
-        	
-//             var loginMemberId = "${sessionScope.loginMember.id}";
-//             var writer_uid = $("#writer_uid1").text();
-//             var boardid = $("#boardid1").val();
-//             var param ={
-//                 boardid: boardid
-//             };
-//             if (confirm("정말로 삭제하시겠습니까?")) {
-//                 // 삭제 처리 코드
-//                 fetch("<c:url value='/board/delete.do'/>", {
-//                     method: "POST",
-//                     headers: {
-//                         "Content-Type": "application/json; charset=UTF-8",
-//                     },
-//                     body: JSON.stringify(param),
-//                 })
-//                 .then((response) => response.json())
-//                 .then((json) => {
-//                     if (json.status) {
-//                         alert("게시글 삭제가 완료되었습니다.");
-//                         boardDetailDialog.dialog("close"); // 다이얼로그 닫기
-//                         listUpdate();
-//                     } else {
-//                         alert("게시글 삭제에 실패했습니다.");
-//                         listUpdate();
-//                     }
-//                 });
-//             }
-//         },
-//         닫기: function() {
-//             $(this).dialog("close");
-//             listUpdate();
-//         }
-//     }
-// });
-
-
-
-
-
-	
 	
 
  /* 게시판 수정 다이얼로그 상세 */
@@ -772,50 +677,14 @@ boardDetailDialog.on("dialogopen", function () {
 ///////////////////////////////// 댓글 모달 다이얼로그 ///////////////////////////////////
 ////////////////////////////////////CRUD 순서로 정렬//////////////////////////////////////
 ////////////////////////////////////////시작//////////////////////////////////////////////
-    
-    
-    
-    //     <div id="boardDetailForm">
-//     <div id="detail-container">
-//         <h1>간단한 게시판 - 게시글 상세</h1>
-//         <input type="hidden" id="boardid1" name="boardid1">
-//         <table class="tb">
-//             <tr>
-//                 <th class="col">제목</th>
-//                 <td id="title1"></td>
-//             </tr>
-//             <tr>
-//                 <th class="col">작성자</th>
-//                 <td id="writer_uid1"></td>
-//             </tr>
-//             <tr>
-//                 <th class="col">내용</th>
-//                 <td>
-//                     <div id="contents1"></div>
-//                 </td>
-//             </tr>
-//             <tr>
-//                 <th class="col">작성날짜</th>
-//                 <td id="reg_date1"></td>
-//             </tr>
-//             <tr>
-//                 <th class="col">조회수</th>
-//                 <td id="view_count1"></td>
-//             </tr>
-//             <tr>
-//                 <th class="col">댓글</th>
-//                 <td>
-//                     <div id="comments"></div>
-//                     <textarea id="comment_contents1"></textarea>
-//                     <button id="comment_submit1">작성</button>
-
 
 
     
-/* 댓글 작성 버튼 동작 */
+// 댓글 작성 버튼 동작 						C Button 시작
+// C Button 시작
 	 $("#comment_submit1").on("click", function() {
 	
-	    alert("댓글 작성 js 함수 시작");
+// 	    alert("댓글 작성 js 함수 시작");
 	    //여기서 ajax로 세션 데이터를 가져와라.
 	    //성공하면 오픈하기 전에 데이터를 출력
 	    //그러고 나서 대화상자 화면에 보이게 한다.
@@ -842,69 +711,56 @@ boardDetailDialog.on("dialogopen", function () {
 	        if (json.status) {
 	        	$("#comment_contents1").val('');
 	        	alert(json.message);
+	        	commentList(boardid);
 	        	
-	        				 //작성 성공 후 전체 리스트 출력
-					   	     fetch("<c:url value='/comment/list.do'/>?comment_boardid="+boardid, {
-									     method: "GET",
-									     headers: {
-									         "Content-Type": "application/json; charset=UTF-8",
-									     }
-									 })
-									 .then((response) => response.json())
-									 .then((json) => {
-									     if (json.status) {
-									//              alert("댓글 출력 성공!");
-									         console.log(json.commentList);
-									         
-													 displayComments(json.commentList, json.loginMember);
-									     } else {
-									//              alert("댓글 출력 실패!");
-									     }
-									 });
-	        	
-		      	
 	        } else {
 	            alert(json.message);
 	        }
 	    });
 	    
+	 }); // 댓글 작성 버튼 동작	완			 C Button 완
 
-	    
-	 });
+	// 댓글 출력 fetch 함수 						R fetch 
+	// R fetch 
+	// 반복 시 계속 commentList(boardid)로 가자. commentList(boardid);
+ function commentList(boardid){
+	 //작성 성공 후 전체 리스트 출력
+	     fetch("<c:url value='/comment/list.do'/>?comment_boardid="+boardid, {
+			     method: "GET",
+			     headers: {
+			         "Content-Type": "application/json; charset=UTF-8",
+			     }
+			 })
+			 .then((response) => response.json())
+			 .then((json) => {
+			     if (json.status) {
+							 displayComments(json.commentList, json.loginMember, json.lastCommentid, json.totalCounts);
+			     } else {
+			     }
+			 });
+ }	// 댓글 출력 fetch 함수 완						R fetch 
 
 
-//      fetch("<c:url value='/comment/list.do'/>?comment_boardid="+boardid, {
-//          method: "GET",
-//          headers: {
-//              "Content-Type": "application/json; charset=UTF-8",
-//          }
-//      })
-//      .then((response) => response.json())
-//      .then((json) => {
-//          if (json.status) {
-// //              alert("댓글 출력 성공!");
-//              console.log(json.commentList);
-// 					  	displayComments(json.commentList);
-		      	
-//          } else {
-// //              alert("댓글 출력 실패!");
-//          }
-//      });
-
-
-		// 댓글 출력은 게시글 출력 자리(게시글 CRUD 순서 중 R에 있음)
+		// 비동기 구현용 첫 댓글 출력         R html create
+		// 댓글 출력은 게시글 출력 자리(게시글 CRUD 순서 중 R에 있음)			R html create
 		// 댓글 비동기 구현 위해 html 생성 및 삽입부
 		// 검색 키워드 : displayComments, 수정 버튼, 수정 완료 버튼, UpdateButton, DeleteButton.
 		// displayComments 검색해서 쓰는 부분 찾자
-function displayComments(comments, loginMember) {
-    const commentsContainer = $("#comments");
+function displayComments(comments, loginMember, lastCommentid, totalCounts) {
+					
+		// 더보기 종료 조건용 변수
+		const commentContents = $("#comments .comment-contents").last();
+		const commentid = commentContents.attr("data-commentid");
+		
+		// 댓글 출력할 form틀
+		const commentsContainer = $("#comments");
 
     // 기존 div id="comments" 에 쌓인 데이터 제거
     commentsContainer.empty();
     
     // div id="comments"에 데이터 추가
-    comments.forEach(function(comment) {                                                  
-        var commentElement = 
+    comments.forEach(function(comment) {
+    	var commentElement = 
 		        	'<div class="comment">' +
 		            '<div class="comment-content">' +
 		                '<div>작성자 : <span class="comment-writer">' + comment.writer_uid + '</span></div>' +
@@ -915,7 +771,6 @@ function displayComments(comments, loginMember) {
 		            '</div>' +
 		            '<div>';
         // Session에서 loginMember 가져오기
-
         // ID 검증부
         if (loginMember) {
             if (loginMember.id === comment.writer_uid) {
@@ -937,14 +792,120 @@ function displayComments(comments, loginMember) {
        		     '</div>';
         commentsContainer.append(commentElement);
     });
+		//더보기 버튼
+		if(totalCounts>10){
+				var commentMoreElement = 
+					'<button class="commentMoreButton comment-buttons commentMoreButtonFirst" style="background-color: green; color: white;">더보기</button>';
+					commentsContainer.append(commentMoreElement); //더보기 버튼 append하기	
+		}
 }
 
 
 
+/* 댓글 더보기 동작  */
+$(document).on("click", ".commentMoreButton", function() {
+		console.log("댓글 더보기 동작 진입");
 
+		const commentContents = $("#comments .comment-contents").last();
+		const commentid = commentContents.attr("data-commentid");
+		const boardid = $("#boardid1").val();
+		var param = {
+        commentid: commentid,
+        comment_boardid: boardid
+    };
+    fetch("<c:url value='/comment/ajaxList.do'/>", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json; charset=UTF-8",
+          },
+          body: JSON.stringify(param)
+      })
+      .then((response) => response.json())
+      .then((json) => {
+          if (json.status) {
+              alert("댓글 더보기 성공!");
+              
+              displayCommentsMore(json.commentList, json.loginMember, json.lastCommentid, json.totalCounts);
+              console.log(json.commentList);
+          } else {
+              alert("댓글 더보기 실패.");
+          }
+    });
+});
+	 		
+		
+		
+		
+//더보기 종료 조건용 전역 변수 선언
+//displayCommentsMore 실행 될 때마다 10씩 추가
+var displayCommentsMoreCount=0;
+		
+// 비동기 구현용 첫 댓글 출력         R html create
+// 댓글 출력은 게시글 출력 자리(게시글 CRUD 순서 중 R에 있음)			R html create
+// 댓글 비동기 구현 위해 html 생성 및 삽입부
+// 검색 키워드 : displayComments, 수정 버튼, 수정 완료 버튼, UpdateButton, DeleteButton.
+// displayComments 검색해서 쓰는 부분 찾자
+function displayCommentsMore(comments, loginMember, lastCommentid, totalCounts) {
+	
+	// 더보기 종료 조건용 변수
+	const commentContents = $("#comments .comment-contents").last();
+	const commentid = commentContents.attr("data-commentid");
+	
+	// 댓글 출력할 form틀
+	const commentsContainer = $("#comments");
+		
 
+		// 기존 div id="comments" 에 쌓인 데이터 제거하면 안됨.
+		// 그래야 쌓임
+		// 이 부분이 차이점
+		// 		commentsContainer.empty();
+		
+		// div id="comments"에 데이터 추가
+		comments.forEach(function(comment) {
+		var commentElement = 
+        	'<div class="comment">' +
+            '<div class="comment-content">' +
+                '<div>작성자 : <span class="comment-writer">' + comment.writer_uid + '</span></div>' +
+                '<div>작성일자 : <span class="comment-date">' + comment.mod_date + '</span></div>' +
+            '</div>' +
+            '<div class="comment-text">' +
+                '<textarea class="comment-contents" data-commentid="' + comment.commentid + '" readonly>' + comment.contents + '</textarea>' +
+            '</div>' +
+            '<div>';
+					// Session에서 loginMember 가져오기
+					// ID 검증부
+					if (loginMember) {
+					    if (loginMember.id === comment.writer_uid) {
+					        // 로그인한 사용자와 댓글 작성자가 동일한 경우 버튼 보이기
+					        commentElement += '<button class="commentUpdateButton comment-buttons">수정</button>' +
+					            '<button class="commentDeleteButton comment-buttons">삭제</button>';
+					    } else {
+					        // 로그인한 사용자와 댓글 작성자가 다른 경우 버튼 숨기기
+					        commentElement += '<button class="commentUpdateButton comment-buttons" style="display:none">수정</button>' +
+					            '<button class="commentDeleteButton comment-buttons" style="display:none">삭제</button>';
+					    }
+					} else {
+					    // 로그인하지 않은 경우 버튼 숨기기
+					    commentElement += '<button class="commentUpdateButton comment-buttons" style="display:none">수정</button>' +
+					        '<button class="commentDeleteButton comment-buttons" style="display:none">삭제</button>';
+					}
+								 //열려 있는 div 태그 닫기
+							   commentElement += '</div>' +
+							     '</div>';
+					commentsContainer.append(commentElement);
+					});
+			//더보기 버튼
+			if(totalCounts-displayCommentsMoreCount>10){
+				var commentMoreElement = 
+					'<button class="commentMoreButton comment-buttons commentMoreButtonMore" style="background-color: green; color: white;">더보기</button>';
+					commentsContainer.append(commentMoreElement); //더보기 버튼 append하기
+			}
+	displayCommentsMoreCount+=10;
+}
 
+		
 
+		
 // 댓글 수정 < - > 수정 완료로 동작이 변하는 루틴
 let updateButtonStart = null;
 
@@ -968,16 +929,13 @@ $(document).on("click", ".commentUpdateButton", function() {
 });
 
 
-
-
-
 // 댓글 수정(수정 완료 버튼 클릭 시)
 $(document).on("click", ".commentUpdateFinish", function(e) {
-	  var commenContents = $(e.target).closest(".comment").find(".comment-contents");
-    alert(commenContents.attr("data-commentid"));
+	  var commentContents = $(e.target).closest(".comment").find(".comment-contents");
+
     var param = {
-        commentid: commenContents.attr("data-commentid"),
-        contents: commenContents.val()
+        commentid: commentContents.attr("data-commentid"),
+        contents: commentContents.val()
     };
 	
     // 수정 완료 상태에서의 동작 추가
@@ -1006,66 +964,42 @@ $(document).on("click", ".commentUpdateFinish", function(e) {
     
 });
 
-	 
-	 
- 
-// 	/* 	댓글 수정(수정 완료 클릭 시) */
-// $(document).on("click", ".commentUpdateButton", function() {
-//     var commenContents = $(this).closest(".comment").find("#comment-contents");
-//     var param = {
-//         commentid: commenContents.attr("data-commentid"),
-//         contents: commenContents.val()
-//     };
-	
-//     console.log("param", param);
-    
-//     fetch("<c:url value='/comment/update.do'/>", {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json; charset=UTF-8",
-//         },
-//         body: JSON.stringify(param)
-//     })
-//     .then((response) => response.json())
-//     .then((json) => {
-//         if (json.status) {
-//             alert("댓글 수정이 완료되었습니다.");
-//             commentList(); // 댓글 리스트 업데이트
-//         } else {
-//             alert("댓글 수정에 실패했습니다.");
-//         }
-//     });
-// });
-	 
-	/* 댓글 삭제 동작  */
-	 $("#commentDeleteButton").on("click", ".delete-comment", function() {
-		    var index = $(this).data("index");
-		    var comment = comments[index];
-		    var boardid = comment.comment_boardid;
 
-		    if (confirm("정말로 삭제하시겠습니까?")) {
-		        var param = {
-		            boardid: boardid
-		        };
-		        fetch("<c:url value='/comment/delete.do'/>", {
-		            method: "POST",
-		            headers: {
-		                "Content-Type": "application/json; charset=UTF-8",
-		            },
-		            body: JSON.stringify(param)
-		        })
-		        .then((response) => response.json())
-		        .then((json) => {
-		            if (json.status) {
-		                alert("댓글 삭제가 완료되었습니다.");
-		                // 성공적으로 삭제된 경우에 대한 처리 추가
-		                commentList(); // 댓글 리스트 업데이트
-		            } else {
-		                alert("댓글 삭제에 실패했습니다.");
-		            }
-		        });
-		    }
-		});
+	/* 댓글 삭제 동작  */
+$(document).on("click", ".commentDeleteButton", function() {
+		console.log("댓글 삭제 동작 진입");
+	  var commentContents = $(".comment").find(".comment-contents");
+	  var boardid = $("#boardid1").val(); // 삭제 루틴에는 필요 없지만, 댓글 리스트 업데이트에 필요함
+	  console.log(commentContents.attr("data-commentid"));
+	  var commentid = commentContents.attr("data-commentid");
+    var param = {
+//         commentid: commentContents.attr("data-commentid")
+        commentid: commentid
+    };
+	
+    if (confirm("정말로 삭제하시겠습니까?")) {
+        var param = {
+            commentid: commentid
+        };
+        fetch("<c:url value='/comment/delete.do'/>", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json; charset=UTF-8",
+            },
+            body: JSON.stringify(param)
+        })
+        .then((response) => response.json())
+        .then((json) => {
+            if (json.status) {
+                alert("댓글 삭제가 완료되었습니다.");
+                // 성공적으로 삭제된 경우에 대한 처리 추가
+                commentList(boardid); // 댓글 리스트 업데이트
+            } else {
+                alert("댓글 삭제에 실패했습니다.");
+            }
+        });
+    }
+});
 	 
 
 
@@ -1137,40 +1071,69 @@ $(document).on("click", ".commentUpdateFinish", function(e) {
 	 	document.querySelector("#pageForm").submit(); 
 	 }
  
+ 
+ 		////////// 댓글 input시 text-area 높이 동적 조절 함수//////
+ 		///////////////////////// 시작 ////////////////////////////
+	 function autoResizeTextarea(element) {
+		  element.style.height = "auto";
+		  element.style.height = element.scrollHeight + "px";
+		}
 
+		// 이벤트 핸들러 등록
+		var textarea = document.querySelector('.comment-contents');
 
+		textarea.addEventListener('input', function() {
+		  autoResizeTextarea(this);
+		});
+
+		// 초기 로딩 시에도 높이를 조절해야 하는 경우
+		autoResizeTextarea(textarea);
+ 		////////// 댓글 input시 text-area 높이 동적 조절 함수//////
+ 		///////////////////////// 끝 //////////////////////////////
     
+ 		// 더보기 버튼 매번 생기는데, 가리는 코드
+ 		// 버튼 클릭하면 매번 가리고, 새로 생김.
+ 		$(document).on("click", ".commentMoreButtonFirst", function() {
+	    // 더보기 버튼을 클릭했을 때 실행될 코드
+	    $(this).hide(); // 버튼을 숨깁니다.
+			});
+	 		
+ 		$(document).on("click", ".commentMoreButtonMore", function() {
+ 		    // 더보기 버튼을 클릭했을 때 실행될 코드
+ 		    $(this).hide(); // 버튼을 숨깁니다.
+ 				});
+ 		
     
-/*     체크 삭제 루틴 */
-/*     $("#deleteBtn").on("click", function(e) {
-        const boardList = $("#boardList");
-        e.preventDefault();
-        let ids = [];
-        const items = $(".item:checked");
-        items.each(function() {
-            ids.push($(this).val());
-        });
-        console.log(ids);
+//      // 체크 삭제 루틴 
+//      $("#deleteBtn").on("click", function(e) {
+//         const boardList = $("#boardList");
+//         e.preventDefault();
+//         let ids = [];
+//         const items = $(".item:checked");
+//         items.each(function() {
+//             ids.push($(this).val());
+//         });
+//         console.log(ids);
 
-        //삭제 함수
-        //boardList.removeChild(삭제 객체)
+//         //삭제 함수
+//         //boardList.removeChild(삭제 객체)
 
-        $.ajax({
-            url: "<c:url value='/board/deleteBoard.do'/>",
-            method: "POST",
-            contentType: "application/json; charset=UTF-8",
-            data: JSON.stringify({ boardids: ids }),
-            dataType: "json",
-            success: function(json) {
-                alert(json.message);
-                if (json.status) {
-                    location.href = "<c:url value='/board/list.do'/>";
-                }
-            }
-        });
+//         $.ajax({
+//             url: "<c:url value='/board/deleteBoard.do'/>",
+//             method: "POST",
+//             contentType: "application/json; charset=UTF-8",
+//             data: JSON.stringify({ boardids: ids }),
+//             dataType: "json",
+//             success: function(json) {
+//                 alert(json.message);
+//                 if (json.status) {
+//                     location.href = "<c:url value='/board/list.do'/>";
+//                 }
+//             }
+//         });
 
-        return false;
-    }); */
+//         return false;
+//     });
   
       
 //     function selectAllCheckboxes() {
@@ -1191,10 +1154,6 @@ $(document).on("click", ".commentUpdateFinish", function(e) {
 //     	return true;
 //     });
 
-
-    
-    
-//     */
 
     
 </script>

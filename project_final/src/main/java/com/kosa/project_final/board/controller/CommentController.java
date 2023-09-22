@@ -27,21 +27,9 @@ public class CommentController {
 	private CommentService commentService;
 
 	
-	
-	
-	
-	
-
-
-	
-	
-	
-	
-	
-	
 //	댓글 목록 R =====================================================================================
 
-	
+
 	// 1. 댓글 전체 목록 페이지 [초기 10개]
 	@ResponseBody
 	@RequestMapping("/comment/list.do")
@@ -56,19 +44,10 @@ public class CommentController {
     	HttpSession session = req.getSession();
 		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
     	
-    	
 		try {
-			for (CommentDTO commentBoard : commentService.getCommentList(comment)) {
-	           if(comment.getComment_boardid() == commentBoard.getComment_boardid()) {
-	        	   	System.out.println("comment.getComment_boardid() 좌변 : "+ comment.getComment_boardid());
-	        	   	System.out.println("commentBoard.getComment_boardid() 우변 : "+ commentBoard.getComment_boardid());
-	        	   	System.out.println("commentBoard.getComment_boardid() 우변 : "+ commentBoard.getContents());
-	        	   	
-	        	   	iWantCommentList.add(commentBoard);
-	           		} //if문 끝
-	        	} //for문 끝
-			
-	        result.put("commentList", iWantCommentList);
+	        result.put("commentList", commentService.getCommentList(comment));
+	        result.put("lastCommentid",commentService.getLastCommentid(comment).getCommentid());
+	        result.put("totalCounts", commentService.getTotalCount(comment).getTotalCounts());
 	        result.put("loginMember", loginMember);
 	        result.put("status", true);
 	        
@@ -77,38 +56,46 @@ public class CommentController {
         	result.put("message", "서버에 오류 발생");
         	e.printStackTrace();
         }
-		System.out.println(result);
-		
+		System.out.println("코멘트의 리스트 메소드 리절트야 : "+result);
+		System.out.println(commentService.getLastCommentid(comment));
+		System.out.println("commentService.getTotalCount(comment).getTotalCounts 는 이거야 : "+commentService.getTotalCount(comment).getTotalCounts());
+		System.out.println("코멘트 리스트 메소드 끝이야");
 		return result;
 		
 		
 	} // list
-	
-	
-	
+
 	
 	// 1-2. 댓글 전체 목록 페이지 [ajax로 페이징 출력] [더보기]
 	@ResponseBody
 	@RequestMapping(value="/comment/ajaxList.do")
-	public Map<String, Object> ajaxList(CommentDTO comment, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	public Map<String, Object> ajaxList(@RequestBody CommentDTO comment, HttpServletRequest req, HttpServletResponse res) throws Exception {
     	System.out.println("comment.controller.ajaxlist()-> ajax invoked.");
+
+    	System.out.println("컨트롤러에서 comment : "+comment);
+
     	Map<String, Object> result = new HashMap<String, Object>();
-    	result = commentService.getCommentList2(comment);
-    	
-		try { 
-        	result.put("status", true);
-        } catch (Exception e) { 
+
+    	// 로그인 세션 받아오기 위한 셋팅
+    	HttpSession session = req.getSession();
+		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
+
+		try {
+	    	result.put("commentList", commentService.getCommentList2(comment));
+	    	result.put("lastCommentid",commentService.getLastCommentid(comment).getCommentid());
+	    	result.put("loginMember", loginMember);
+	    	result.put("status", true);
+        } catch (Exception e) {
         	result.put("status", false);
         	result.put("message", "서버에 오류 발생");
         	e.printStackTrace();
         }
 		System.out.println(result);
 		return result;
-		
+
 	} // list
-	
-	
-	
+
+
 //	댓글 글쓰기 C =====================================================================================
 
 	// 2-1. 댓글 글쓰기
@@ -121,7 +108,7 @@ public class CommentController {
 		System.out.println();
 		
 		HttpSession session = req.getSession();
-		Map<String,Object> jsonResult = new HashMap<>();
+		Map<String,Object> result = new HashMap<>();
 		boolean status = false; 
 		
 		if((MemberDTO) session.getAttribute("loginMember")!= null) {
@@ -134,10 +121,10 @@ public class CommentController {
 		
 		System.out.println("0 :  "+comment);
 
-		jsonResult.put("status", status);
-		jsonResult.put("message", status ? "댓글이 등록되었습니다" : "로그인해주세요.");
+		result.put("status", status);
+		result.put("message", status ? "댓글이 등록되었습니다" : "로그인해주세요.");
 		
-		return jsonResult;
+		return result;
 	
 	} // insert
 
@@ -150,13 +137,14 @@ public class CommentController {
 	@RequestMapping(value = "/comment/delete.do", method = RequestMethod.POST)
 	public Map<String,Object> delete(@RequestBody CommentDTO comment, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		System.out.println("comment.controller.delete() invoked.");
-		Map<String,Object> jsonResult=new HashMap<>();
+		
+		Map<String,Object> result=new HashMap<>();
 		boolean status = commentService.commentDelete(comment.getCommentid());
 		
-		jsonResult.put("status", status);
-		jsonResult.put("message", status ? "글이 삭제되었습니다" : "오류가 발생하였습니다. 다시 시도해주세요.");
+		result.put("status", status);
+		result.put("message", status ? "글이 삭제되었습니다" : "오류가 발생하였습니다. 다시 시도해주세요.");
 		
-		return jsonResult;
+		return result;
 	} // delete
 
 
@@ -183,7 +171,7 @@ public class CommentController {
 		System.out.println("board.controller.update() invoked.");
 		
 		HttpSession session = req.getSession();
-		Map<String,Object> jsonResult = new HashMap<>();
+		Map<String,Object> result = new HashMap<>();
 
 		MemberDTO member = (MemberDTO) session.getAttribute("loginMember");
 		comment.setWriter_uid(member.getId());
@@ -192,12 +180,11 @@ public class CommentController {
 		
 		System.out.println("수정의 comment는 : "+comment);
 		
-		jsonResult.put("status", status);
-		jsonResult.put("message", status ? "글이 수정되었습니다." : "오류가 발생하였습니다. 다시 시도해주세요.");
+		result.put("status", status);
+		result.put("message", status ? "글이 수정되었습니다." : "오류가 발생하였습니다. 다시 시도해주세요.");
 		
-		return jsonResult;
+		return result;
 		
 	} // update
 	
-
 }

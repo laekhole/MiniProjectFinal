@@ -1,5 +1,11 @@
 @charset "UTF-8";
 
+.commentMoreButton {
+    /* Add your special styles here */
+
+    /* Add any other styles you want */
+}
+
 .comment-buttons {
 	padding: 10px 20px;
 	background-color: #007bff;
@@ -33,9 +39,11 @@
 
 .comment-contents {
     width: 100%;
-    min-height: 100px;
+    min-height: 40px;
     border: 1px solid #ccc;
     padding: 5px;
+    box-sizing: border-box;
+    resize: none;
 }
 
 .comment-buttons button {

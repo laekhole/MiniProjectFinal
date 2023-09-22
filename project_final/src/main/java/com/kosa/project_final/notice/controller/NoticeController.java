@@ -6,12 +6,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.kosa.project_final.board.domain.BoardDTO;
 import com.kosa.project_final.notice.domain.NoticeDTO;
 import com.kosa.project_final.notice.service.NoticeService;
 
@@ -26,18 +28,22 @@ public class NoticeController  {
 	
 	
 	// 1. 공지사항 전체 목록 페이지
-	/*
-	 * public String list(NoticeDTO notice, HttpServletRequest req,
-	 * HttpServletResponse res) throws Exception {
-	 * System.out.println("notice.controller.NoticeList() invoked.");
-	 * 
-	 * try { req.setAttribute("notice", service.getNoticeList()); } catch (Exception
-	 * e) { e.printStackTrace(); }
-	 * 
-	 * return "notice/list.jsp";
-	 * 
-	 * }
-	 */
+	@RequestMapping("/notice/list.do")
+	public String list(NoticeDTO notice, Model model) throws Exception {
+    	System.out.println("notice.controller.list() invoked." + notice);
+//
+//    	try { 
+//    		
+//    		model.addAttribute("result", noticeService.getBoardList2(notice));
+//
+//    		board.setTotalCount(noticeService.getTotalCount(notice));
+//
+//        } catch (Exception e) { 
+//        	e.printStackTrace();
+//        }
+
+		return "notice/noticeList";
+	} // list
 	
 	// 1-2. [페이징]공지사항 전체 목록 페이지
 	public String list(NoticeDTO notice, HttpServletRequest req, HttpServletResponse res) throws Exception {

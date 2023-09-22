@@ -22,6 +22,8 @@ public class CommentDTO {
 	private Date mod_date;		// 수정날짜
 	private String delete_yn; 	// 삭제유무
 
+	private String [] ids;      // 삭제시 사용될 아이디들
+	private String totalCounts;	// 총갯수
 	
 } // comment
 

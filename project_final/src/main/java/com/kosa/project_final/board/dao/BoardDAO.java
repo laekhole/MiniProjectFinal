@@ -28,18 +28,20 @@ public interface BoardDAO {
 	//7. 조회수 증가
 	public int viewCount(int boardid) throws Exception;
 	
-	//8. 체크박스된 게시글 삭제
-	public int deleteBoards(Map<String, Object> params) throws Exception;
-		
-	//9. 더보기 만들기
+	//8. 페이징 만들기
 	public List<BoardDTO> getBoardList2(BoardDTO board) throws Exception;
-	
-	//10. 게시글 10개씩 돌아오게하는 메서드
-	public List<BoardDTO> getboardListBoforeN(BoardDTO board) throws Exception;
 
+	//9. 게시글 10개씩 돌아오게하는 메서드
+	public List<BoardDTO> getboardListBoforeN(BoardDTO board) throws Exception;
+	
+	//10. 답글 글쓰기
 	public int reply(BoardDTO board);
 
+	//11. [페이징용도] DB에서의 전체 데이터 갯수 얻기
 	public int getTotalCount(BoardDTO board);
+
+	// 체크박스된 게시글 삭제
+	public int deleteBoards(Map<String, Object> params) throws Exception;
 
 	
 } // end class

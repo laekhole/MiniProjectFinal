@@ -63,19 +63,8 @@ public class BoardDAOImpl implements BoardDAO {
 		return sqlSession.update("mapper.board.viewCount", boardid);
 	} // viewCount
 
-
-	//8. 체크박스된 게시글 삭제
-	/*
-	 * 삭제시 할  게시물아이디는 배열로 구성하여 list라는 이름으로 전달 한다 
-	 */
-	@Override
-	public int deleteBoards(Map<String, Object> params) throws Exception {
-		return sqlSession.delete("mapper.board.deleteBoards", params);
-		
-	 } // deleteBoards
-
 	
-	//9. 더보기 만들기
+	//8. 페이징 만들기
 	@Override
 	public List<BoardDTO> getBoardList2(BoardDTO board) throws Exception {
 		System.out.println("BoardDAO Impl의 board : "+board);
@@ -83,20 +72,30 @@ public class BoardDAOImpl implements BoardDAO {
 	}
 	
 	
-	//10. 게시글 삭제해도 다시 글 10개씩 보이게 하는 메서드
+	//9. 게시글 삭제해도 다시 글 10개씩 보이게 하는 메서드
 	public List<BoardDTO> getboardListBoforeN(BoardDTO board) throws Exception {
 		return sqlSession.selectList("mapper.board.getboardListBoforeN", board);
 	}
 
+	//10. 답글 글쓰기
 	@Override
 	public int reply(BoardDTO board) {
 		return sqlSession.insert("mapper.board.insertBoardReply", board);
 	}
 
-	// DB에서의 전체 데이터 갯수 얻기
+	//11. [페이징용도] DB에서의 전체 데이터 갯수 얻기
 	@Override
 	public int getTotalCount(BoardDTO board) {
 		return sqlSession.selectOne("mapper.board.getTotalCount", board);
 	}
 
+	// 체크박스된 게시글 삭제
+	// 삭제시 할  게시물아이디는 배열로 구성하여 list라는 이름으로 전달 한다 	 
+	@Override
+	public int deleteBoards(Map<String, Object> params) throws Exception {
+		return sqlSession.delete("mapper.board.deleteBoards", params);
+		
+	 } // deleteBoards
+
+	
 } // end class

@@ -51,7 +51,7 @@
 					</c:otherwise>
 				</c:choose>
  			</table>
-   		<a href='notice/noticesGet.jsp'>목록 보기</a>
+   		<a href="<c:url value='/notice/list.do' />">목록 보기</a>
 		</div>
 		<div id="gallery" class="tabContent">
 	  	<h2>게시판 내용입니다.</h2>
@@ -82,7 +82,7 @@
 				</c:otherwise>
 			</c:choose>
 		</table>
-		<a href='board/boardsGet.jsp'>목록 보기</a>
+		<a href="<c:url value='/board/list.do' />">목록 보기</a>
 		</div>   
 	</div>
 	<div id="links">
