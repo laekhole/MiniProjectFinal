@@ -44,9 +44,16 @@ public class CommentController {
     	HttpSession session = req.getSession();
 		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
     	
+		CommentDTO lastComment = commentService.getLastCommentid(comment);
+		int lastCommentid;
+		if(lastComment==null ) {
+			lastCommentid=0;
+		}else {
+			lastCommentid = lastComment.getCommentid();
+		}
 		try {
 	        result.put("commentList", commentService.getCommentList(comment));
-	        result.put("lastCommentid",commentService.getLastCommentid(comment).getCommentid());
+	        result.put("lastCommentid",lastCommentid);
 	        result.put("totalCounts", commentService.getTotalCount(comment).getTotalCounts());
 	        result.put("loginMember", loginMember);
 	        result.put("status", true);
@@ -56,10 +63,10 @@ public class CommentController {
         	result.put("message", "서버에 오류 발생");
         	e.printStackTrace();
         }
-		System.out.println("코멘트의 리스트 메소드 리절트야 : "+result);
-		System.out.println(commentService.getLastCommentid(comment));
-		System.out.println("commentService.getTotalCount(comment).getTotalCounts 는 이거야 : "+commentService.getTotalCount(comment).getTotalCounts());
-		System.out.println("코멘트 리스트 메소드 끝이야");
+//		System.out.println("코멘트의 리스트 메소드 리절트야 : "+result);
+//		System.out.println(commentService.getLastCommentid(comment));
+//		System.out.println("commentService.getTotalCount(comment).getTotalCounts 는 이거야 : "+commentService.getTotalCount(comment).getTotalCounts());
+//		System.out.println("코멘트 리스트 메소드 끝이야");
 		return result;
 		
 		

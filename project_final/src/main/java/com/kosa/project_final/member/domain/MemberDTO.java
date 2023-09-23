@@ -17,6 +17,7 @@ public class MemberDTO {
 	private String birth;
 	private String gender;
 	private String phone;
+	private String email;
 	
 	private String [] ids;         // 삭제시 사용될 아이디들
 

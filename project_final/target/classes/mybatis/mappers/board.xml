@@ -13,7 +13,8 @@
 			, title
 			, writer_uid
 			, mod_date
-			, view_count 
+			, view_count
+			, writer_email
 		from board 
 		where delete_yn='N'
 		order by boardid desc
@@ -35,7 +36,7 @@
 	<insert id="insertBoard" >
 		<selectKey keyProperty="boardid" resultType="int"  order="BEFORE">
 			select 
-				seq_board.nextval boardid 
+				seq_board.nextval boardid
 			from dual
 		</selectKey>
 		INSERT INTO board (
@@ -45,6 +46,7 @@
 			, contents
 			, writer_uid
 			, reg_date
+			, writer_email
 		) VALUES (
 			  0
 			, #{boardid}
@@ -52,6 +54,7 @@
 			, #{contents}
 			, #{writer_uid}
 			, sysdate
+			, #{writer_email}
 		)
 	</insert>
 
@@ -251,7 +254,7 @@
 	        </if>
 	    </where>
 	</select>
-	
+
 
 <!--     <select id="getBoardList" resultType="BoardDTO"> -->
 <!--         <![CDATA[ -->
@@ -278,8 +281,8 @@
 <!--         WHERE nrow BETWEEN #{startNo} AND #{endNo} -->
 <!--         ]]> -->
 <!--     </select> -->
-	
-	
-	
-	
+
+
+
+
 </mapper>

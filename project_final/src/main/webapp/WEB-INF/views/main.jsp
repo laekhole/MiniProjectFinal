@@ -71,8 +71,8 @@
 					    <td>조회수</td>
 					</tr>
 					<c:forEach var="board" items="${boardTop5}">
-						<tr class = "post-meta">
-					    <td><c:out value="${board.boardid}" /></td>
+						<tr class="post-meta">
+					    <td class="board-number"><c:out value="${board.boardid}" /></td>
 							<td id="boardDetail">${board.level == 1 ? "" : "[답변]"} ${board.title}</td>
 							<td>${board.writer_uid}</td>
 							<td class="tab"></td>
@@ -126,12 +126,13 @@
 <div id="createUserForm">
 	<div class="createUser">
     <h1>회원 기능 - 회원 가입</h1>
-		아이디   <br><input type="text" id="id2" name="id" ><br>
-		비밀번호<br><input type="password" id="pwd2" name="pwd" ><br>
-		이름      <br><input type="text" id="name2" name="name" ><br>
-		생년월일 <br><input type="text" id="birth2" name="birth" ><br>
-		성별      <br><input type="text" id="gender2" name="gender" ><br>
-		연락처   <br><input type="text" id="phone2" name="phone" ><br>
+		아이디   <br><input type="text" id="id2" name="id2" ><br>
+		비밀번호<br><input type="password" id="pwd2" name="pwd2" ><br>
+		이름      <br><input type="text" id="name2" name="name2" ><br>
+		생년월일 <br><input type="text" id="birth2" name="birth2" ><br>
+		성별      <br><input type="text" id="gender2" name="gender2" ><br>
+		연락처   <br><input type="text" id="phone2" name="phone2" ><br>
+		이메일   <br><input type="text" id="email2" name="email2" ><br>
 	</div>
 </div>
 
@@ -145,6 +146,7 @@
 		생년월일 <br><input type="text" id="birth3" name="birth3" ><br>
 		성별      <br><input type="text" id="gender3" name="gender3" ><br>
 		연락처   <br><input type="text" id="phone3" name="phone3" ><br>
+		이메일   <br><input type="text" id="email3" name="email3" ><br>
 	</div>
 </div>
 
@@ -158,6 +160,7 @@
 		생년월일 <br><input type="text" id="birth4" name="birth4" value="" readonly><br>
 		성별      <br><input type="text" id="gender4" name="gender4" value="" readonly><br>
 		연락처   <br><input type="text" id="phone4" name="phone4" value="" readonly><br>
+		이메일   <br><input type="text" id="email4" name="email4" ><br>
 	</div>
 </div>
 
@@ -448,6 +451,7 @@ createDialog = $("#createUserForm").dialog({
               const birth = $("#birth3").val();
               const gender = $("#gender3").val();
               const phone = $("#phone3").val();
+              const email = $("#email3").val();
               
               if (pwd === "") {
                   alert("비밀번호를 입력해주세요");
@@ -542,6 +546,7 @@ createDialog = $("#createUserForm").dialog({
 							const birth = json.member.birth;
 							const gender = json.member.gender;
 							const phone = json.member.phone;
+							const email= json.member.email;
              console.log("id = "+id);
              console.log("pwd = "+pwd);
              console.log("name = "+uname);
@@ -553,6 +558,7 @@ createDialog = $("#createUserForm").dialog({
 		      	$("#birth4").val(birth);
 		      	$("#gender4").val(gender);
 		      	$("#phone4").val(phone);
+		      	$("#email4").val(email);
     //       detailDialog.dialog("close"); // 이거 뭐지 기억이 안 나는데;
          } else {
              alert("정보 수정 실패!");
@@ -560,7 +566,7 @@ createDialog = $("#createUserForm").dialog({
      });
 
 
-     
+
      $("#detailUserForm").dialog("open");
   });
 
@@ -725,10 +731,13 @@ createDialog = $("#createUserForm").dialog({
                   .then((response) => response.json())
                   .then((json) => {
                       if (json.status) {
-                          alert("게시글 작성 성공!");
-                          boardReplyDialog.dialog("close");
-                          boardDetailDialog.dialog("close");
-                          listUpdate();
+                          alert("답글 작성 성공!");
+	                        boardReplyDialog.dialog("close");
+	                        boardDetailDialog.dialog("close");
+	                        listUpdate(); //게시판 리스트 갱신
+	                        alert("메일 전송 메소드 직전임");
+	                        mailSend(); //메일 전송
+	                        alert("메일 전송 메소드 지나감");
                       } else {
                           alert("게시글 작성 실패!");
                           listUpdate();
@@ -743,16 +752,51 @@ createDialog = $("#createUserForm").dialog({
   		}
   });
 
+  
+//메일
+//답글 작성 성공 시 메일 발송
+function mailSend(){
+	var title = $("#title1").text();
+	var boardid =	$("#boardid1").val();
+	var writer_email = $("#writer_email1").val();
+
+	console.log(title+"   "+boardid+"  "+writer_email);
+	var param ={
+			title: title,
+			boardid: boardid,
+			writer_email: writer_email
+	};
+	console.log(param);
+	fetch("<c:url value='/board/sendMail.do'/>", {
+	    method: "POST",
+	    headers: {
+	        "Content-Type": "application/json; charset=UTF-8",
+	    },
+	    body: JSON.stringify(param),
+	})
+	.then((response) => response.json())
+	.then((json) => {
+	    if (json.status) {
+	        alert("메일 전송 성공!");
+	        boardReplyDialog.dialog("close");
+	        boardDetailDialog.dialog("close");
+	        listUpdate();
+	    } else {
+	        alert("메일 전송 실패!");
+	        listUpdate();
+	    }
+	});
+}
 
 
       /* 게시판 상세 폼 띄우기 (게시판 상세 버튼) */
       const boardDetailEventHandler = () => {
   	    $(".post-meta #boardDetail").on("click", function() {
-  	
-  	       alert("게시판 상세보기");
+
+  	       alert("메인화면에서 게시판 상세보기");
   	       //여기서 ajax로 세션 데이터를 가져와라.
   	       //성공하면 오픈하기 전에 데이터를 출력
-  	       //
+
   	       //그러고 나서 대화상자 화면에 보이게 한다.
   				var boardid = $(this).siblings(".board-number").text();
   	      const param ={
@@ -801,95 +845,183 @@ createDialog = $("#createUserForm").dialog({
       
       
       
-  // /* 게시판 상세 다이얼로그 (게시판 수정 다이얼로그도 이 안에 있음) */
-  // boardDetailDialog = $("#boardDetailForm").dialog({
-//      autoOpen: false,
-//      modal: true,
-//      width: 500,
-//      height: 700
-  // });
+  /* 게시판 상세 다이얼로그 (게시판 수정 다이얼로그도 이 안에 있음) */
+  boardDetailDialog = $("#boardDetailForm").dialog({
+     autoOpen: false,
+     modal: true,
+     width: 500,
+     height: 700
+  });
       
+  
+  //게시글 상세 다이얼로그 열기 전에 실행될 함수
+boardDetailDialog.on("dialogopen", function () {
 
-  // //게시글 상세 다이얼로그 열기 전에 실행될 함수
-  // boardDetailDialog.on("dialogopen", function () {
-//       var loginMemberId = ${sessionScope.loginMember.id};
-//       var writer_uid = $("#writer_uid1").text();
-    
-//       if (loginMemberId === writer_uid) {
-//           dialog.dialog("option", "buttons", {
-//               "게시글 수정하기": function () {
-//                   $("#boardUpdateForm").dialog("open");
-                  
-//                   $(this).dialog("option", "buttons", {
-//                       "수정 완료": function () {
-//                       	listUpdate()
-//                       },
-//                       닫기: function () {
-//                       	listUpdate()
-//                           $(this).dialog("close");
-//                       }
-                     
-//                   });
-//               },
-//               "답글 쓰기" : function(){
-//               	boardReplyDialog.dialog("open"); //답글 다이얼로그(boardReplyDialog) 열기
-//               },
-//               "삭제하기" : function(){ //얘는 다이얼로그가 아니라서 바로 함수 넣고 진행. 삭제 함수 짤 수도 있지만, 익숙치 않으므로 지저분해도 일단 진행
-//                var boardid = $("#boardid1").val();
-//   				             var param ={
-//   				                 boardid: boardid
-//   				             };
-//   				             if (confirm("정말로 삭제하시겠습니까?")) {
-//   						                 // 삭제 처리 코드
-//   						                 fetch("<c:url value='/board/delete.do'/>", {
-//   						                     method: "POST",
-//   						                     headers: {
-//   						                         "Content-Type": "application/json; charset=UTF-8",
-//   						                     },
-//   						                     body: JSON.stringify(param),
-//   						                 })
-//   						                 .then((response) => response.json())
-//   						                 .then((json) => {
-//   						                     if (json.status) {
-//   						                         alert("게시글 삭제가 완료되었습니다.");
-//   						                         boardDetailDialog.dialog("close"); // 다이얼로그 닫기
-//   						                         listUpdate(); //게시글 리스트 비동기 구현
-//   						                     } else {
-//   						                         alert("게시글 삭제에 실패했습니다.");
-//   						                     }
-//   						                 });
-//   				             	}
-//            		},
+		var loginMemberIdOption;
+		if ("${sessionScope.loginMember.id}" != null){ 											// 비회원이 게시판 들어올 수도 있는데,
+			  loginMemberIdOption = "${sessionScope.loginMember.id}"; // if문 처리 안하면 비회원 들어왔을 때
+				} 																													// modal 터짐
+    var writer_uid = $("#writer_uid1").text();
+				
+    if (loginMemberIdOption === writer_uid) {
+    	boardDetailDialog.dialog("option", "buttons", {
+            "게시글 수정하기": function () {
+                $("#boardUpdateForm").dialog("open");
+                
+                $(this).dialog("option", "buttons", {
+                    "수정 완료": function () {
+                    	listUpdate();
+                    },
+                    닫기: function () {
+                    	listUpdate()
+   	           					$("#comments").empty();
+                        $(this).dialog("close");
+                    }
+                   
+          	      });
+       		   },
+            "답글 쓰기" : function(){
+            	boardReplyDialog.dialog("open"); //답글 다이얼로그(boardReplyDialog) 열기
+         	   },
+            "삭제하기" : function(){ //얘는 다이얼로그가 아니라서 바로 함수 넣고 진행. 삭제 함수 짤 수도 있지만, 익숙치 않으므로 지저분해도 일단 진행
+             var boardid = $("#boardid1").val();
+				             var param ={
+				                 boardid: boardid
+				             };
+				             if (confirm("정말로 삭제하시겠습니까?")) {
+						                 // 삭제 처리 코드
+						                 fetch("<c:url value='/board/delete.do'/>", {
+						                     method: "POST",
+						                     headers: {
+						                         "Content-Type": "application/json; charset=UTF-8",
+						                     },
+						                     body: JSON.stringify(param),
+						                 })
+						                 .then((response) => response.json())
+						                 .then((json) => {
+						                     if (json.status) {
+						                         // alert("게시글 삭제가 완료되었습니다.");
+						                         boardDetailDialog.dialog("close"); // 다이얼로그 닫기
+						                         listUpdate(); //게시글 리스트 비동기 구현
+						                     } else {
+						                         // alert("게시글 삭제에 실패했습니다.");
+						                     }
+						                 });
+				             	}
+         		},
+            닫기: function () {
+            	listUpdate() //게시글 리스트 비동기 구현
+           					$("#comments").empty();
+                $(this).dialog("close"); //게시글 상세 다이얼로그(boardDetailDialog) 닫기
+            }
+        });
+    }
+		else if(loginMemberIdOption!=""){
+       	boardDetailDialog.dialog("option", "buttons",{
+             "답글 쓰기" : function () {
+           	  boardReplyDialog.dialog("open"); //답글 다이얼로그(boardReplyDialog) 열기
+            },
+              닫기: function () {
+           	   listUpdate() //게시글 리스트 비동기 구현
+           					$("#comments").empty();
+                    $(this).dialog("close");//게시글 상세 다이얼로그(boardDetailDialog) 닫기
+                }
+          })
+    }
+		else {
+       	boardDetailDialog.dialog("option", "buttons", {
+               닫기: function () {
+               	listUpdate() //게시글 리스트 비동기 구현
+           					$("#comments").empty();
+                   $(this).dialog("close");//게시글 상세 다이얼로그(boardDetailDialog) 닫기
+               }
+           });
+       }
+});
+
+
+
+
+// //게시글 상세 다이얼로그 열기 전에 실행될 함수
+// boardDetailDialog.on("dialogopen", function () {
+//     var loginMemberId = ${sessionScope.loginMember.id};
+//     var writer_uid = $("#writer_uid1").text();
+  
+//     if (loginMemberId === writer_uid) {
+//         dialog.dialog("option", "buttons", {
+//             "게시글 수정하기": function () {
+//                 $("#boardUpdateForm").dialog("open");
+                
+//                 $(this).dialog("option", "buttons", {
+//                     "수정 완료": function () {
+//                     	listUpdate()
+//                     },
+//                     닫기: function () {
+//                     	listUpdate()
+//                         $(this).dialog("close");
+//                     }
+                   
+//                 });
+//             },
+//             "답글 쓰기" : function(){
+//             	boardReplyDialog.dialog("open"); //답글 다이얼로그(boardReplyDialog) 열기
+//             },
+//             "삭제하기" : function(){ //얘는 다이얼로그가 아니라서 바로 함수 넣고 진행. 삭제 함수 짤 수도 있지만, 익숙치 않으므로 지저분해도 일단 진행
+//              var boardid = $("#boardid1").val();
+// 				             var param ={
+// 				                 boardid: boardid
+// 				             };
+// 				             if (confirm("정말로 삭제하시겠습니까?")) {
+// 						                 // 삭제 처리 코드
+// 						                 fetch("<c:url value='/board/delete.do'/>", {
+// 						                     method: "POST",
+// 						                     headers: {
+// 						                         "Content-Type": "application/json; charset=UTF-8",
+// 						                     },
+// 						                     body: JSON.stringify(param),
+// 						                 })
+// 						                 .then((response) => response.json())
+// 						                 .then((json) => {
+// 						                     if (json.status) {
+// 						                         alert("게시글 삭제가 완료되었습니다.");
+// 						                         boardDetailDialog.dialog("close"); // 다이얼로그 닫기
+// 						                         listUpdate(); //게시글 리스트 비동기 구현
+// 						                     } else {
+// 						                         alert("게시글 삭제에 실패했습니다.");
+// 						                     }
+// 						                 });
+// 				             	}
+//          		},
+//             닫기: function () {
+//             	listUpdate() //게시글 리스트 비동기 구현
+//                 $(this).dialog("close"); //게시글 상세 다이얼로그(boardDetailDialog) 닫기
+//             }
+//         });
+//     }
+// 		else if(loginMemberId!=""){
+//        	boardDetailDialog.dialog("option", "buttons",{
+//              "답글 쓰기" : function () {
+//            	  boardReplyDialog.dialog("open"); //답글 다이얼로그(boardReplyDialog) 열기
+//             },
 //               닫기: function () {
-//               	listUpdate() //게시글 리스트 비동기 구현
-//                   $(this).dialog("close"); //게시글 상세 다이얼로그(boardDetailDialog) 닫기
-//               }
-//           });
-//       }
-//   		else if(loginMemberId!=""){
-//          	boardDetailDialog.dialog("option", "buttons",{
-//                "답글 쓰기" : function () {
-//              	  boardReplyDialog.dialog("open"); //답글 다이얼로그(boardReplyDialog) 열기
-//               },
-//                 닫기: function () {
-//              	   listUpdate() //게시글 리스트 비동기 구현
-//                       $(this).dialog("close");//게시글 상세 다이얼로그(boardDetailDialog) 닫기
-//                   }
-//             })
-//       }
-//   		else {
-//          	boardDetailDialog.dialog("option", "buttons", {
-//                  닫기: function () {
-//                  	listUpdate() //게시글 리스트 비동기 구현
-//                      $(this).dialog("close");//게시글 상세 다이얼로그(boardDetailDialog) 닫기
-//                  }
-//              });
-//          }
-  // });
+//            	   listUpdate() //게시글 리스트 비동기 구현
+//                     $(this).dialog("close");//게시글 상세 다이얼로그(boardDetailDialog) 닫기
+//                 }
+//           })
+//     }
+// 		else {
+//        	boardDetailDialog.dialog("option", "buttons", {
+//                닫기: function () {
+//                	listUpdate() //게시글 리스트 비동기 구현
+//                    $(this).dialog("close");//게시글 상세 다이얼로그(boardDetailDialog) 닫기
+//                }
+//            });
+//        }
+// });
 
 
 
-
+  
 
 
 //       /* 게시판 상세 다이얼로그 패치(삭제는 여기서 완성, 수정 다이얼로그 오픈(수정 버튼)도 이 안에 있음) */

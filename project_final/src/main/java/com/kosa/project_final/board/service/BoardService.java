@@ -8,9 +8,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.kosa.project_final.board.dao.AttacheFileDAO;
 import com.kosa.project_final.board.dao.BoardDAO;
-import com.kosa.project_final.board.domain.AttacheFileDTO;
 import com.kosa.project_final.board.domain.BoardDTO;
 
 @Service
@@ -19,8 +17,6 @@ public class BoardService {
 	@Autowired
 	private BoardDAO boardDAO;
 	
-	@Autowired
-	private AttacheFileDAO attacheFileDAO;
 
 	// 게시판 재정의
 	public BoardService() {
@@ -41,7 +37,7 @@ public class BoardService {
 		System.out.println("board.service.getBoard() 함수 호출됨");
 		
 		BoardDTO boardDTO = boardDAO.getBoard(boardid);
-		boardDTO.setAttacheFileList(attacheFileDAO.getList(boardDTO));
+//		boardDTO.setAttacheFileList(attacheFileDAO.getList(boardDTO));
 		
 		return boardDAO.getBoard(boardid);
 	} // getBoard
@@ -77,23 +73,23 @@ public class BoardService {
 		return boardDAO.deleteBoard(boardid);
 	} // deleteBoard
 
-	
+
 	//6. 메인에 TOP5 출력하기
 	public List<BoardDTO> boardTop5() throws Exception {
 		System.out.println("board.service.boardTop5() 함수 호출됨");
-		
+
 		return boardDAO.boardTop5();
 	} // boardTop5
-	
-	
+
+
 	//7. 조회수 증가
 	public int viewCount(int boardid) throws Exception {
 		System.out.println("board.service.viewCount() 함수 호출됨");
-		
+
 		return boardDAO.viewCount(boardid);
 	} // viewCount
-	
-	
+
+
 	//8. 체크박스 게시글 삭제하기
 	public boolean deleteBoards(String[] boardids) throws Exception {
 		System.out.println("boardIds.toString() : " + Arrays.toString(boardids));
@@ -102,8 +98,8 @@ public class BoardService {
 		params.put("list", boardids);
 		return 0 != boardDAO.deleteBoards(params);
 	} // deleteBoards
-	
-	
+
+
 	//9. 페이징 처리된 리스트 출력하기
 	public Map<String, Object> getBoardList2(BoardDTO board) throws Exception {
 		System.out.println("board.service.getBoardList2() 함수 호출됨 1번 -> " + board);
@@ -142,19 +138,19 @@ public class BoardService {
 	
 	
 	
-	public int reply(BoardDTO board) {
-	
-		int result = boardDAO.reply(board);
-		
-		if (board.getAttacheFileList() != null) {
-			for (AttacheFileDTO attacheFile : board.getAttacheFileList()) {
-				attacheFile.setBoardid(board.getBoardid());
-				attacheFileDAO.insert(attacheFile);
-			}
-		}
-		
-		return result; 
-	}
+//	public int reply(BoardDTO board) {
+//	
+//		int result = boardDAO.reply(board);
+//		
+//		if (board.getAttacheFileList() != null) {
+//			for (AttacheFileDTO attacheFile : board.getAttacheFileList()) {
+//				attacheFile.setBoardid(board.getBoardid());
+//				attacheFileDAO.insert(attacheFile);
+//			}
+//		}
+//		
+//		return result; 
+//	}
 	
 	public int getTotalCount(BoardDTO board) throws Exception {
 		System.out.println("BoardService.getTotalCount() 함수 호출됨");

@@ -49,16 +49,18 @@ public class BoardController {
 	
 	// 1. 게시판 전체 목록 페이지[더보기]
 	@RequestMapping("/board/list.do")
-	public String list(BoardDTO board, Model model) throws Exception {
+	public String list(BoardDTO board, Model model, HttpSession session) throws Exception {
     	System.out.println("board.controller.list() invoked." + board);
 
     	try { 
-    		
-    		model.addAttribute("result", boardService.getBoardList2(board));
 
+    		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
     		board.setTotalCount(boardService.getTotalCount(board));
 
-        } catch (Exception e) { 
+    		model.addAttribute("result", boardService.getBoardList2(board));
+    		model.addAttribute("loginMember", loginMember);
+
+    	} catch (Exception e) {
         	e.printStackTrace();
         }
 
@@ -101,9 +103,11 @@ public class BoardController {
 		boolean status = false;
 		Map<String,Object> jsonResult=new HashMap<>();
 		
+		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
 		BoardDTO boardView = boardService.getBoard(board.getBoardid());  //게시글 상세 business logic
 		
-//		System.out.println("			니가 이기나 내가 이기나 함 해보자");
+		System.out.println("			니가 이기나 내가 이기나 함 해보자");
+		System.out.println("board부터 찍자 "+board);
 //		System.out.println("board.getBoardid() : "+board.getBoardid());
 //		System.out.println("boardView.getBoardid() : "+boardView.getBoardid());
 //		System.out.println("			니가 이기나 내가 이기나 함 해보자");
@@ -113,6 +117,7 @@ public class BoardController {
 		System.out.println("boardView가 뭐가 들어왔니 ? : "+boardView);
 		
 		status = true;
+		jsonResult.put("loginMember", loginMember);
 		jsonResult.put("boardView", boardView);
 		jsonResult.put("status", status);
 		
@@ -226,19 +231,20 @@ public class BoardController {
 		System.out.println("board는 :  "+board);
 		System.out.println();
 		HttpSession session = req.getSession();
-		Map<String,Object> jsonResult = new HashMap<>();
+		Map<String,Object> insertControllerResult = new HashMap<>();
 
 		MemberDTO member = (MemberDTO) session.getAttribute("loginMember");
 		board.setWriter_uid(member.getId());
+		board.setWriter_email(member.getEmail());
 		
 		boolean status = boardService.boardInsert(board);
 		
 		System.out.println("board는 : "+board);
 
-		jsonResult.put("status", status);
-		jsonResult.put("message", status ? "글이 등록되었습니다" : "오류가 발생하였습니다. 다시 시도해주세요.");
+		insertControllerResult.put("status", status);
+		insertControllerResult.put("message", status ? "글이 등록되었습니다" : "오류가 발생하였습니다. 다시 시도해주세요.");
 		
-		return jsonResult;
+		return insertControllerResult;
 	
 	} // insert
 

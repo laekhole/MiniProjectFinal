@@ -20,6 +20,7 @@ public class BoardDTO {
 	private String title;		// 제목
 	private String contents;	// 내용
 	private String writer_uid;	// 글쓴이
+	private String writer_email;// 글쓴이 메일주소(답글 받기용)
 	private Date reg_date;		// 작성날짜
 	private Date mod_date;		// 수정날짜
 	private int view_count;		// 조회수
